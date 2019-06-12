@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "churchillW <chuchilenin@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "mongodb": "^3.2.7"
+  }
 }
