@@ -36,6 +36,18 @@ module.exports = internal.Token = class {
     }
 
     decode(token) {
-       return jwt.decode(token,{complete: true}) //return node if token is invalid
+        try {
+            const decode_token = _decode(token)
+            if(decode_token === 'undefined' || decode_token === null || !decode_token['payload']['bwngr551251']){
+                return false
+            }
+            return decode_token
+        } catch (error) {
+            console.log(error)
+            return false
+        }
     }
+    
 }
+
+const _decode = (token) => jwt.decode(token,{complete: true}) //return node if token is invalid
