@@ -10,7 +10,7 @@
   "author": "churchillW <chuchilenin@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "argon2": "^0.23.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.2.7"
   }

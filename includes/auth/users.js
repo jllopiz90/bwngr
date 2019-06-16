@@ -1,5 +1,6 @@
 "use strict"
 const fs = require('fs')
+const argon2 = require('argon2');
 const bcrypt = require('bcrypt')
 const token = require('./token')
 const privateKEY  = fs.readFileSync('../includes/secrets/private.key', 'utf8');
@@ -86,22 +87,44 @@ module.exports = internal.User = class {
     }
 }
 
-const _writeToDisk = (path, data) => {
-    fs.writeFileSync(path, JSON.stringify(data))
+const _writeToDisk = (error, data) => {
+    if(error){
+        console.log("Error: ",error)
+    }
+    const {path, payload} = data
+    fs.writeFileSync(path, JSON.stringify(payload))
+}
+
+// ========== Using argon2 (the community say this is better)  ===============
+async const _argon2Pswd = (path, payload, callback) => {
+    try {
+        let lastRecord = payload.pop()
+        const password = lastRecord.pswd
+        const hash = await argon2.hash(password);
+        lastRecord.pswd = hash
+        payload.push(lastRecord)
+        callback({path: path, payload: payload})
+      } catch (err) {
+        callback(err)
+      }
 }
 
 const _lastElement = (data) => data[data.length - 1]
 
-const _cryptPassword = (path, data, callback) => {
-    bcrypt.genSalt(10, function (err, salt) {
-        if (err)
+
+// ========== Using bcrypt  ===============
+const _cryptPassword = (path, payload, callback) => {
+    bcrypt.genSalt(10, function (error, salt) {
+        if (error)
             callback(err)
-        let lastRecord = data.pop()
+        let lastRecord = payload.pop()
         const password = lastRecord.pswd
         bcrypt.hash(password, salt, function (err, hash) {
+            if(err)
+                callback(err)
             lastRecord.pswd = hash
-            data.push(lastRecord)
-            callback(path, data)
+            payload.push(lastRecord)
+            callback({path: path, payload: payload})
         })
     })
 }
