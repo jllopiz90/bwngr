@@ -1,6 +1,6 @@
 "use strict"
 const fs = require('fs')
-var path = require('path');
+const path = require('path');
 const argon2 = require('argon2');
 const token = require('./token')
 const pathToKey = path.dirname(__dirname) + '/secrets/private.key' 
