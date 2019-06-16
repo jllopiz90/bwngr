@@ -1,13 +1,6 @@
 'use strict'
-
 const jwt = require('jsonwebtoken')
 
-//////////////////////////// CONSTANTS /////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// PRIVATE and PUBLIC key ==== use 'utf8' to get string instead of byte array  (512 bit key)
-// const fs = require('fs')
-// const privateKEY  = fs.readFileSync('../secrets/private.key', 'utf8');
-// const publicKEY  = fs.readFileSync('../secrets/public.key', 'utf8');
 const signOptions = {
     issuer:  "SENSELESS@TEAM",
     expiresIn:  "12h",

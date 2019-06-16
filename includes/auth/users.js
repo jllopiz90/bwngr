@@ -1,9 +1,10 @@
 "use strict"
 const fs = require('fs')
+var path = require('path');
 const argon2 = require('argon2');
-const bcrypt = require('bcrypt')
 const token = require('./token')
-const privateKEY  = fs.readFileSync('../includes/secrets/private.key', 'utf8');
+const pathToKey = path.dirname(__dirname) + '/secrets/private.key' 
+const privateKEY  = fs.readFileSync(pathToKey, 'utf8');
 
 const internal = {}
 module.exports = internal.User = class {
@@ -43,7 +44,7 @@ module.exports = internal.User = class {
         } catch (err) {
             console.log('inside save user catch:')
             console.log('Error:', err)
-            _cryptPassword(this._path, [{
+            _argon2Pswd(this._path, [{
                 id: 1,
                 user_name: userName,
                 pswd: password,
@@ -52,7 +53,7 @@ module.exports = internal.User = class {
         }
     }
 
-    verifyUser(userName, password) {
+    async verifyUser(userName, password) {
         try {
             fs.accessSync(this._path, fs.constants.F_OK)
             fs.accessSync(this._path, fs.constants.W_OK | fs.constants.R_OK)
@@ -67,18 +68,24 @@ module.exports = internal.User = class {
             if (user === 'unefined') {
                 return { status: false, message: 'User and password doesn\'t match.' }
             }
-            const match = bcrypt.compareSync(password, user.pswd)
-            if (match) {
-                const Token = new token()
-                const payload = {
-                    userId: user.id,
-                    userName: user.user_name,
-                    msg: 'have nice day!',
-                    bwngr551251: 1
+            
+            try {
+                if (await argon2.verify(user.pswd, password)) {
+                    const Token = new token()
+                    const payload = {
+                        userId: user.id,
+                        userName: user.user_name,
+                        msg: 'have nice day!',
+                        bwngr551251: 1
+                    }
+                    return { status: true, message:  Token.sign(payload,{audience:'myBwngrScan'},privateKEY)}
+                } else {
+                    return { status: false, message: 'User and password doesn\'t match.' }
                 }
-                return { status: true, message:  Token.sign(payload,{audience:'myBwngrScan'},privateKEY)}
-            }
-            return { status: false, message: 'User and password doesn\'t match.' }
+              } catch (err) {
+                console.log('Error: ',err)  
+                return { status: false, message: 'An error happened' }
+              }
         } catch (err) {
             console.log('inside verifyUser catch:')
             console.log('Error:', err)
@@ -87,7 +94,7 @@ module.exports = internal.User = class {
     }
 }
 
-const _writeToDisk = (error, data) => {
+const _writeToDisk = (error,data) => {
     if(error){
         console.log("Error: ",error)
     }
@@ -95,36 +102,17 @@ const _writeToDisk = (error, data) => {
     fs.writeFileSync(path, JSON.stringify(payload))
 }
 
-// ========== Using argon2 (the community say this is better)  ===============
-async const _argon2Pswd = (path, payload, callback) => {
+const _argon2Pswd = async (path, payload, callback) => {
     try {
         let lastRecord = payload.pop()
         const password = lastRecord.pswd
         const hash = await argon2.hash(password);
         lastRecord.pswd = hash
         payload.push(lastRecord)
-        callback({path: path, payload: payload})
+        callback(null,{path: path, payload: payload})
       } catch (err) {
         callback(err)
       }
 }
 
 const _lastElement = (data) => data[data.length - 1]
-
-
-// ========== Using bcrypt  ===============
-const _cryptPassword = (path, payload, callback) => {
-    bcrypt.genSalt(10, function (error, salt) {
-        if (error)
-            callback(err)
-        let lastRecord = payload.pop()
-        const password = lastRecord.pswd
-        bcrypt.hash(password, salt, function (err, hash) {
-            if(err)
-                callback(err)
-            lastRecord.pswd = hash
-            payload.push(lastRecord)
-            callback({path: path, payload: payload})
-        })
-    })
-}
