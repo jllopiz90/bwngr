@@ -1,47 +1,19 @@
-const http = require('http');
-const {parse} = require('querystring');
-const FORM_URLENCODED = 'application/x-www-form-urlencoded';
-const has = Object.prototype.hasOwnProperty;
+import app from "./server";
+import { MongoClient } from "mongodb";
 
-console.log('running ...');
-const routeMangPath = process.cwd() + '/routing/routeManager';
-const routeMang = require(routeMangPath);
-const httpServer = http.createServer((req, res)=>{
-    const router = new routeMang();
-    const { method, url } = req;
-    if (method == 'POST') {
-        collectRequestData(req, (err,params) => {
-            if(err){
-                return res.end(JSON.stringify({status:false, message: err}));
-            }    
-            try {
-                if(!has.call(params,'action')) {
-                    res.end(JSON.stringify({status:true, message: 'Action missing!'}))
-                }
-                const result = router.handleRoute(url,params);
-                res.end(JSON.stringify({status:true, message: result}));
-            } catch(error) {
-                res.end(JSON.stringify({status:false, message: error}));
-            }
-        });
-    } else {
-        res.end(JSON.stringify({status:false, message: 'Send a post'}));
-    }
+const port = process.env.PORT || 8000
+MongoClient.connect(process.env.BWNGR_DB_URI,  { useNewUrlParser: true }, async (err, client) => {
+        if(err){
+            console.log('=====Error:',err);
+            throw err;
+        }
+
+        //await some dao and pass it the client as an innjection
+
+        // db gives access to the database
+        // const db = client.db(process.env.BWNGR_DB);
+        //linten on port
+        app.listen(port, () => {
+            console.log(`listening on port ${port}`)
+          })
 })
-httpServer.listen(2020);
-
-const collectRequestData = (request, callback) => {
-    if(request.headers['content-type'] === FORM_URLENCODED) {
-        let body = '';
-        request.on('error', (err) => {
-            console.error('Error inside collectRequestData: ', err.stack);
-            callback(err);
-          }).on('data', chunk => {
-            body += chunk.toString();
-        }).on('end', () => {
-            callback(null,parse(body));
-        });
-    } else {
-        callback(null,'wrong content-type');
-    }
-}

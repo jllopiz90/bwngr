@@ -87,3 +87,7 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 data/users.json
+
+src/secrets/
+ 
+.gitignore
