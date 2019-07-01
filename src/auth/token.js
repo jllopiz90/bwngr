@@ -12,16 +12,19 @@ const signOptions = {
 };
 
 export default class Token {
-    constructor({ name, password, isAdmin = false} = {}) {
+    constructor(name, isAdmin = false) {
         this.name = name;
-        this.password = password;
         this.isAdmin = isAdmin;
     }
     
     toJson() {
-        const regularUser = { name: this.name, email: this.email, bwngr551251: 1 };
-
-        return this.isAdmin ? Object.assign({}, regularUser, {isAdmin: this.isAdmin}) : regularUser;
+        const payload = { 
+            userName: this.name,
+            isAdmin: this.isAdmin,
+            msg: 'have nice day!',
+            bwngr551251: 1
+        }
+        return payload;
     }
 
     sign() {

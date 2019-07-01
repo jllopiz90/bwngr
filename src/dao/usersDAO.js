@@ -20,7 +20,7 @@ export default class UsersDAO {
    * @returns {Object | null} Returns either a single user or nothing
    */
   static async getUser(userName) {
-    return await users.findOne({ userName: userName })
+    return await users.findOne({ userName: userName }, {_id: 0})
   }
 
   /**
@@ -51,7 +51,7 @@ export default class UsersDAO {
     try {
       // Use an UPSERT statement to update the "jwt" field in the document,
       // matching the "user_id" field with the userName passed to this function.
-      const result = await sessions.updateOne(
+      const { result } = await sessions.updateOne(
         { user_id: userName },
         { $set: { jwt, user_id: userName } },
         { upsert: true}
