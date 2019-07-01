@@ -1,16 +1,16 @@
-let users
-let sessions
+let users;
+let sessions;
 
 export default class UsersDAO {
   static async injectDB(conn) {
     if (users && sessions) {
-      return
+      return;
     }
     try {
-      users = await conn.db(process.env.BWNGR_DB).collection("users")
-      sessions = await conn.db(process.env.BWNGR_DB).collection("sessions")
+      users = await conn.db(process.env.BWNGR_DB).collection("users");
+      sessions = await conn.db(process.env.BWNGR_DB).collection("sessions");
     } catch (e) {
-      console.error(`Unable to establish collection handles in userDAO: ${e}`)
+      console.error(`Unable to establish collection handles in userDAO: ${e}`);
     }
   }
 
@@ -20,7 +20,8 @@ export default class UsersDAO {
    * @returns {Object | null} Returns either a single user or nothing
    */
   static async getUser(userName) {
-    return await users.findOne({ userName: userName }, {_id: 0})
+    const result  = await users.findOne({ userName: userName }, { projection: {_id: 0} });
+    return result;
   }
 
   /**
@@ -30,14 +31,14 @@ export default class UsersDAO {
    */
   static async addUser(userInfo) {
     try {
-      const { result } = await users.insertOne(userInfo,{writeConcern: {w: 'majority'}})
-      return { success: result.ok === 1 && result.n === 1 }
+      const { result } = await users.insertOne(userInfo,{writeConcern: {w: 'majority'}});
+      return { success: result.ok === 1 && result.n === 1 };
     } catch (e) {
       if (String(e).startsWith("MongoError: E11000 duplicate key error")) {
-        return { error: "A user with the given name already exists." }
+        return { error: "A user with the given name already exists." };
       }
-      console.error(`Error occurred while adding new user, ${e}.`)
-      return { error: e }
+      console.error(`Error occurred while adding new user, ${e}.`);
+      return { error: e };
     }
   }
 
@@ -53,13 +54,18 @@ export default class UsersDAO {
       // matching the "user_id" field with the userName passed to this function.
       const { result } = await sessions.updateOne(
         { user_id: userName },
-        { $set: { jwt, user_id: userName } },
+        {
+          $currentDate: {
+            issue_time: true,
+          }, 
+          $set: { jwt, user_id: userName} 
+        },
         { upsert: true}
-      )
-      return { success: result.ok === 1 && result.n === 1 }
+      );
+      return { success: result.ok === 1 && result.n === 1 };
     } catch (e) {
-      console.error(`Error occurred while logging in user, ${e}`)
-      return { error: e }
+      console.error(`Error occurred while logging in user, ${e}`);
+      return { error: e };
     }
   }
 
@@ -70,11 +76,11 @@ export default class UsersDAO {
    */
   static async logoutUser(userName) {
     try {
-      const result = await sessions.deleteOne({ user_id: userName })
-      return { success: result.ok === 1 && result.n === 1 }
+      const result = await sessions.deleteOne({ user_id: userName });
+      return { success: result.ok === 1 && result.n === 1 };
     } catch (e) {
-      console.error(`Error occurred while logging out user, ${e}`)
-      return { error: e }
+      console.error(`Error occurred while logging out user, ${e}`);
+      return { error: e };
     }
   }
 
@@ -86,10 +92,10 @@ export default class UsersDAO {
    */
   static async getUserSession(userName) {
     try {
-      return sessions.findOne({ user_id: userName })
+      return sessions.findOne({ user_id: userName }, {projection: {_id:0}});
     } catch (e) {
-      console.error(`Error occurred while retrieving user session, ${e}`)
-      return null
+      console.error(`Error occurred while retrieving user session, ${e}`);
+      return null;
     }
   }
 
@@ -100,26 +106,26 @@ export default class UsersDAO {
    */
   static async deleteUser(userName) {
     try {
-      await users.deleteOne({ userName })
-      await sessions.deleteOne({ user_id: userName })
+      await users.deleteOne({ userName });
+      await sessions.deleteOne({ user_id: userName });
       if (!(await this.getUser(userName)) && !(await this.getUserSession(userName))) {
-        return { success: true }
+        return { success: true };
       } else {
-        console.error(`Deletion unsuccessful`)
-        return { error: `Deletion unsuccessful` }
+        console.error(`Deletion unsuccessful`);
+        return { error: `Deletion unsuccessful` };
       }
     } catch (e) {
-      console.error(`Error occurred while deleting user, ${e}`)
-      return { error: e }
+      console.error(`Error occurred while deleting user, ${e}`);
+      return { error: e };
     }
   }
 
   static async checkAdmin(userName) {
     try {
-      const { isAdmin } = await this.getUser(userName)
-      return isAdmin || false
+      const { isAdmin } = await this.getUser(userName);
+      return isAdmin || false;
     } catch (e) {
-      return { error: e }
+      return { error: e };
     }
   }
 
@@ -128,10 +134,10 @@ export default class UsersDAO {
       const updateResponse = users.updateOne(
         { userName },
         { $set: { isAdmin: true } },
-      )
-      return updateResponse
+      );
+      return updateResponse;
     } catch (e) {
-      return { error: e }
+      return { error: e };
     }
   }
 }

@@ -88,6 +88,6 @@ typings/
 .dynamodb/
 data/users.json
 
-src/secrets/
- 
+/src/secrets/
+/src/dao/.userDao.js.icloud
 .gitignore

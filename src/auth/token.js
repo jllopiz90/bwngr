@@ -12,14 +12,14 @@ const signOptions = {
 };
 
 export default class Token {
-    constructor(name, isAdmin = false) {
+    constructor({name, isAdmin = false} = {}) {
         this.name = name;
         this.isAdmin = isAdmin;
     }
     
     toJson() {
         const payload = { 
-            userName: this.name,
+            name: this.name,
             isAdmin: this.isAdmin,
             msg: 'have nice day!',
             bwngr551251: 1
@@ -28,12 +28,13 @@ export default class Token {
     }
 
     sign() {
+        console.log(this.toJson())
         return jwt.sign(this.toJson(), privateKEY, signOptions);
     }
 
     verify(token) {
         try{
-            const verifyOptions = Object.assign(signOptions,{algorithm: ["RS256"]});
+            const verifyOptions = Object.assign({},signOptions,{algorithm: ["RS256"]});
             return jwt.verify(token,publicKEY,verifyOptions)
         } catch (err) {
             return false
@@ -42,14 +43,14 @@ export default class Token {
 
     decode(token) {
         try {
-            const decode_token = _decode(token)
+            const decode_token = _decode(token);
             if(decode_token === 'undefined' || decode_token === null || !decode_token['payload']['bwngr551251']){
-                return false
+                return false;
             }
-            return decode_token
+            return decode_token;
         } catch (error) {
-            console.log(error)
-            return false
+            console.log(error);
+            return false;
         }
     }
     

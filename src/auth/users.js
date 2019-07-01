@@ -26,7 +26,7 @@ export default class User {
             if (Object.keys(errors).length > 0) {
                 return { errors, success: false };
             }
-            const token = new Token(userName, isAdmin);
+            const token = new Token({ name: userName, isAdmin: isAdmin });
             return {
                 success: true,
                 message: token.sign()
@@ -40,25 +40,27 @@ export default class User {
     static async loginUser(userName, password) {
         try {
             //recover user data from db
-            const { userName: user_name, pswd, isAdmin = false } = await UsersDAO.getUser(userName);
-            if (!user_name) {
+            const { userName: name, pswd, isAdmin = false } = await UsersDAO.getUser(userName);
+            if (!name) {
+
                 return {
                     success: false,
                     errors: 'User and password doesn\'t match.'
                 };
             }
 
-            const token = new Token(user_name, isAdmin);
+            const token = new Token({ name, isAdmin });
 
             if (await argon2.verify(pswd, password)) {
-                const { success } =  await UsersDAO.loginUser(userName, token.sign());
+                const signature = token.sign();
+                const { success } = await UsersDAO.loginUser(userName, signature);
                 return {
-                    status: success,
-                    message: success ? token.sign() : 'An error has happened!'
+                    success,
+                    message: success ? signature : 'An error has happened!'
                 };
             } else {
                 return {
-                    status: false,
+                    success: false,
                     message: 'User and password doesn\'t match.'
                 };
             }
@@ -68,5 +70,19 @@ export default class User {
             console.log('\n===============================================\n')
             throw err;
         }
+    }
+
+    static async verify(token) {
+        const tokenClass = new Token();
+        const { name } = tokenClass.verify(token);
+        if (name) {
+            const { user_id } = await UsersDAO.getUserSession(name);
+            return {
+                success: user_id === name,
+            };
+        }
+        return {
+            sucess: false
+        };
     }
 }
