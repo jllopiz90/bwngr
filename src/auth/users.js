@@ -1,19 +1,37 @@
 "use strict";
 import argon2 from 'argon2';
 import Token from './token';
+import UsersDAO from '../dao/usersDAO';
 
 export default class User {
-
-    static async registerUser(userName, password, callback) {
+    static async registerUser(userName, password, isAdmin = false) {
         try {
-            //check user doesn't exists before try to create it
-
-
-            const pswdHashed = argon2.hash(password);
-            ///////write to db user and pswd hashed
-
-            //call the callback
-            callback(null,{ status: true, message: 'User saved!' }  );
+            let errors = {}
+            const pswdHashed = await argon2.hash(password);
+            let userInfo = {
+                userName,
+                pswd: pswdHashed,
+                timestmap: new Date()
+            };
+            if(isAdmin){
+                userInfo = Object.assign({},userInfo, {isAdmin})
+            }
+            console.log('isAdmin:',isAdmin)
+            console.log('userInfo:',userInfo)
+            const insertResult = await UsersDAO.addUser(userInfo)
+            if(!insertResult.success) { errors.user = insertResult.error }
+            const userFromDB = await UsersDAO.getUser(userName)
+            if (!userFromDB) {
+                errors.general = "Internal error, please try again later"
+            }
+            if (Object.keys(errors).length > 0) {
+                return { errors, success: false}
+            }
+            const token = new Token(userInfo);
+            return {
+                success: true,
+                message: token.sign()
+            }
         } catch (err) {
             callback(err)
             console.log('Error:', err)

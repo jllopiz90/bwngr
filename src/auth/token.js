@@ -1,8 +1,8 @@
 'use strict';
+import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import path from 'path';
-const privateKEY  = fs.readFileSync(path.dirname(__dirname) + '/secrets/private.key' , 'utf8');
-const publicKEY  = fs.readFileSync(path.dirname(__dirname) + '/secrets/public.key' , 'utf8');
+const privateKEY  = fs.readFileSync(process.cwd() + '/src/secrets/private.key' , 'utf8');
+const publicKEY  = fs.readFileSync(process.cwd() + '/src/secrets/public.key' , 'utf8');
 
 const signOptions = {
     issuer:  "SENSELESS@TEAM",
@@ -12,14 +12,16 @@ const signOptions = {
 };
 
 export default class Token {
-    constructor({ name, email, password} = {}) {
-        this.name = name
-        this.email = email
-        this.password = password
+    constructor({ name, password, isAdmin = false} = {}) {
+        this.name = name;
+        this.password = password;
+        this.isAdmin = isAdmin;
     }
     
     toJson() {
-        return { name: this.name, email: this.email}
+        const regularUser = { name: this.name, email: this.email, bwngr551251: 1 };
+
+        return this.isAdmin ? Object.assign({}, regularUser, {isAdmin: this.isAdmin}) : regularUser;
     }
 
     sign() {
@@ -28,7 +30,7 @@ export default class Token {
 
     verify(token) {
         try{
-            const verifyOptions = {...signOptions,algorithm: ["RS256"]};
+            const verifyOptions = Object.assign(signOptions,{algorithm: ["RS256"]});
             return jwt.verify(token,publicKEY,verifyOptions)
         } catch (err) {
             return false

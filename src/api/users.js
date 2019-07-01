@@ -1,14 +1,12 @@
 'use strict';
-import User from '../api/auth/users';
+import UserAuth from '../auth/users';
 
 
-module.exports.execute = async function(params, callback) {
-    const {action, user = '', pswd = '', token = ''} = params;
+module.exports.execute = async function(params) {
+    const {action, user = '', pswd = '', isAdmin = false, token = ''} = params;
     switch(action){
         case 'add_user': 
-            const user =  new User();
-            user.registerUser(user,pswd, callback);
-            break;
+            return await UserAuth.registerUser(user,pswd, isAdmin);
         default:
             return 'no matching action!'    
     }
