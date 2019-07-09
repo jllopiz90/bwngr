@@ -10,27 +10,23 @@ console.log('running ...');
 
 export default http.createServer((req, res) => {
     const { method, url } = req;
-    console.log(`${method} ${url}`);
-    if (method == 'POST') {
-        collectRequestData(req, async (err, params) => {
-            if (err) {
-                return res.end(JSON.stringify({ status: false, message: err }));
-            }
-            if (!has.call(params, 'action')) {
-                res.end(JSON.stringify({ status: true, message: 'Action missing!' }))
-            }
-            try {
-                const result = await router.handleRoute(url, params);    
-                res.end(JSON.stringify(result));
-            } catch (error) {
-                console.log('Error stack:', error.stack)
-                console.log('\n===============================================\n')
-                return res.end(JSON.stringify({ success: false, message: error.toString() }));
-            }
-        });
-    } else {
-        res.end(JSON.stringify({ status: false, message: 'Send a post' }));
-    }
+    console.log(`${method} ${url.split('?')[0]}`);
+    collectRequestData(req, async (err, params) => {
+        if (err) {
+            return res.end(JSON.stringify({ status: false, message: err }));
+        }
+        if (!has.call(params, 'action')) {
+            res.end(JSON.stringify({ status: true, message: 'Action missing!' }))
+        }
+        try {
+            const result = await router.handleRoute(url, params);
+            res.end(JSON.stringify(result));
+        } catch (error) {
+            console.log('Error stack:', error.stack)
+            console.log('\n===============================================\n')
+            return res.end(JSON.stringify({ success: false, message: error.toString() }));
+        }
+    });
 })
 
 const collectRequestData = (request, callback) => {
