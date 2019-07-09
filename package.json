@@ -6,19 +6,23 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ./index.js",
-    "check_user": "node bin/checkUser.js"
+    "add_managers": "babel-node src/bin/add_managers.js"
   },
   "keywords": [],
   "author": "churchillW <chuchilenin@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "argon2": "^0.23.0",
+    "axios": "^0.19.0",
+    "core-js": "^3.1.4",
     "dotenv": "^8.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.2.7"
   },
   "devDependencies": {
+    "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.0",
+    "@babel/node": "^7.5.0",
     "@babel/plugin-transform-runtime": "^7.5.0",
     "@babel/preset-env": "^7.5.0",
     "@babel/register": "^7.4.4",
