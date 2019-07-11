@@ -14,12 +14,15 @@ export default class ManagersDAO {
 
      /**
    * Finds a manager in the `managers` collection
-   * @param {string} managerName - The name of the desired manager
+   * @param {string} name - The name of the desired manager
    * @returns {Object | null} Returns either a single manager or nothing
    */
-  static async getManager(managerName) {
-    const result  = await managers.findOne({ managerName });
-    return result;
+  static async getManager(name) {
+    try {
+      return await managers.findOne({ name });
+    } catch (error) {
+     console.error(`Unable to get manager.--Error: ${String(e)}`); 
+    }
   }
 
   /**
@@ -30,7 +33,6 @@ export default class ManagersDAO {
   static async addManager(ManagerInfo) {
     try {
       let result = await managers.insertOne(ManagerInfo);
-      console.log(result);
       result = result.result;
       return {success : result.ok === 1 && result.n === 1 , message: 'Manager added sucesfully.'};
     } catch (e) {
@@ -44,12 +46,12 @@ export default class ManagersDAO {
 
   /**
    * Remoev a manager from the `managers` collection.
-   * @param {_id} _id -The id of the anager to delete
+   * @param {name} name -The id of the amnager to delete
    */
-  static async deleteManager(managerName) {
+  static async deleteManager(name) {
     try{
-        await managers.deleteOne({managerName});
-        if (!(await this.getManager(managerName))) {
+        await managers.deleteOne({name});
+        if (!(await this.getManager(name))) {
             return { success: true };
           } else {
             console.error(`Deletion unsuccessful`);
