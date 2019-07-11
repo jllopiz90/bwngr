@@ -1,0 +1,60 @@
+'use strict';
+let players;
+
+export default class PlayersDAO {
+    static async injectDB(conn) {
+        if(players)
+            return;
+        try{
+            players = await conn.db(process.env.BWNGR_DB).collection('players');
+        } catch(e) {
+            console.error(`Unable to establish collection handles in playersDAO: ${e}`);
+        }
+    }
+
+    static async getPlayer(id_bwngr) {
+        try {
+            return players.findOne({id_bwngr});
+        } catch (e) {
+            console.error(`Unable to get player.Erorr-- ${String(e)}`);
+        }
+    }
+
+    static async addPlayer(playerInfo) {
+        try {
+            const { result: result } = await players.insertOne(playerInfo);
+            return {
+                success: result.ok === 1 && result.n === 1, 
+                message: 'Player added.'
+            };
+        } catch (e) {
+            console.error(`Unable to add the player.Error-- ${String(e)}`);
+            return {success: false, message: 'Unable to add player.'};
+        }
+    }
+
+    static async deletePlayer(id) {
+        try {
+            await players.deleteOne({id_bwngr: id});
+            if(!(await this.getPlayer(id))){
+                return {success: true, message: 'Player removed'};
+            }
+        } catch (e) {
+            console.error(`Unable to delete player.Error-- ${String(e)}`);
+            return {success: false, message: 'Unable to delete player.'};
+        }
+    }
+
+    static async insertPlayersBulk(playersInfo) {
+        try {
+            const insertOperations = playersInfo.map( elem => {
+                return {insertOne: {'document': elem}};
+            });
+            const result = await players.bulkWrite(insertOperations);
+            return {success: result.insertedCount === playersInfo.length};   
+        } catch (e) {
+            console.error(`Unable to bulk insert players.Error-- ${String(e)}`);
+            return {success: false, message: 'Unable to bulk insert players'};
+        }
+    }
+}

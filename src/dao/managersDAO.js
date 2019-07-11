@@ -19,9 +19,16 @@ export default class ManagersDAO {
    */
   static async getManager(name) {
     try {
-      return await managers.findOne({ name });
+      return {
+        success: true,
+        message: await managers.findOne({ name })
+      }
     } catch (error) {
-     console.error(`Unable to get manager.--Error: ${String(e)}`); 
+      console.error(`Unable to get manager.--Error: ${String(e)}`); 
+      return {
+        success: false,
+        message: 'Unable to get manager'
+      }
     }
   }
 
@@ -67,16 +74,12 @@ export default class ManagersDAO {
    * Inserts manager into the `managers` collection in bulk operation
    * @param {ManagersInfo} - The info of the managers to insert
    */
-  static async insertManagersBulk(managersInfo) {
+  static async  insertManagersBulk(managersInfo) {
     try{
-      console.log(managersInfo)
       const insertOperations = managersInfo.map(( managerInfo ) => {
-        console.log(managerInfo)
         return { insertOne: { 'document': managerInfo}}
       });
-      console.log(insertOperations)
       const result = await managers.bulkWrite(insertOperations);
-      console.log('something')
       return {success: result.insertedCount === managersInfo.length}
     }catch(e) {
       console.error(`Error ocurred while inserting in bulk.-- ${e}`);
