@@ -57,4 +57,21 @@ export default class PlayersDAO {
             return {success: false, message: 'Unable to bulk insert players'};
         }
     }
+
+    static async updatePrice({id_bwngr, increment}) {
+        try {
+            console.log('id:',id_bwngr)
+            console.log('increment:',increment)
+            const  { result }  = await players.updateOne(
+                {id_bwngr: id_bwngr},
+                {$inc: {price: increment}}
+            );
+            return {
+                success: result.nModified === 1 && result.ok === 1
+            };
+        } catch (e) {
+            console.error(`Unable to increment price for player with id_bwngr ${id_bwngr}.Error-- ${String(e)}`);
+            return {success: false, message: String(e)};
+        }
+    }
 }

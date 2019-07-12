@@ -1,14 +1,14 @@
 'use strict';
 require("dotenv").config();
 import 'core-js/stable';
-import ManagersDAO from '../dao/managersDAO';
+import PlayersDAO from '../dao/playersDAO';
 import { MongoClient } from "mongodb";
 
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
 let args = process.argv.slice(2);
 
-const setBalance = async ({amount = '', id_bwngr = ''}) => {
+const adjustPrice = async ({increment = '', id_bwngr = ''}) => {
     try{
         MongoClient.connect(
             process.env.BWNGR_DB_URI,
@@ -20,16 +20,10 @@ const setBalance = async ({amount = '', id_bwngr = ''}) => {
             })
             .then(async client => {
                 let result;
-                await ManagersDAO.injectDB(client);
-                console.log('amount:',amount)
+                await PlayersDAO.injectDB(client);
+                console.log('increment:',increment)
                 console.log('id:',id_bwngr)
-                if(id_bwngr === ''){
-                    console.log('setting all managers')
-                    result = await ManagersDAO.setBalanceAllPlayers(amount);
-                } else {
-                    console.log('setting 1 managers')
-                    result = await ManagersDAO.setBalancePlayer({amount, id_bwngr})
-                }
+                result = await PlayersDAO.updatePrice({id_bwngr: parseInt(id_bwngr), increment: parseInt(increment)})
                 console.log(result);
                 client.close()
             });
@@ -40,10 +34,9 @@ const setBalance = async ({amount = '', id_bwngr = ''}) => {
 }
 
 if(args.length > 1) {
-    const [amount, id_bwngr] = args;
-    setBalance({amount, id_bwngr});
-} else {
-    const [amount] =args;
-    setBalance({amount});
+    const [increment, id_bwngr] =args;
+    adjustPrice({increment, id_bwngr});
+}else {
+    console.log('missing params');
 }
 
