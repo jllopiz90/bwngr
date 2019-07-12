@@ -87,10 +87,44 @@ export default class ManagersDAO {
     }
   }
 
+  static async setBalanceAllPlayers(amount) {
+    try{
+      const amountToUpdate = await managers.find({balance: {"$ne": parseInt(amount)}}).count();
+      const { result } = await managers.updateMany(
+        {},
+        {
+          $set:{ balance: parseInt(amount) }
+        }
+      );
+      return {
+        success: result.nModified === amountToUpdate && result.ok === 1
+      }; 
+    }catch(e) {
+      console.error(`Error ocurred while seting balance for all managers.Error-- ${String(e)}`);
+      return {success: false, message: String(e)}; 
+    }
+  }
+
+  static async setBalancePlayer({amount, id_bwgnr}) {
+    try {
+      const { result } =  await managers.updateOne(
+        {id_bwgnr},
+        {
+          $set:{ balance: parseInt(amount) }
+        }
+      );
+      return {
+        success: result.nModified === 1 && result.ok === 1
+      };
+    } catch (e) {
+      console.error(`Unable to set balance for player with id_bwngr ${id_bwgnr}.Error-- ${String(e)}`);
+      return {success: false, message: String(e)};
+    }
+  }
 }
 
 /**
- * Parameter passed to addUser method
+ * Parameter passed to addManager method
  * @typedef ManagerInfo
  * @property {string} ManagerInfo
  */

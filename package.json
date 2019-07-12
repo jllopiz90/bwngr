@@ -6,9 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ./index.js",
-    "add_managers": "babel-node src/bin/add_managers.js",
     "show_me": "babel-node src/bin/show_me.js",
-    "add_players": "babel-node src/bin/add_players.js"
+    "add_managers": "babel-node src/bin/add_managers.js",
+    "add_players": "babel-node src/bin/add_players.js",
+    "set_balance": "babel-node src/bin/set_balance.js"
   },
   "keywords": [],
   "author": "churchillW <chuchilenin@gmail.com>",
