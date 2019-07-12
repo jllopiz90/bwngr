@@ -21,6 +21,7 @@ const getManagers = async () => {
                 await ManagersDAO.injectDB(client);
                 const result = await ManagersDAO.insertManagersBulk(data.map( elem => ({ name:elem.name, id_bwngr: elem.id})));
                 console.log(result);
+                client.close()
             });
         
     }catch(e) {

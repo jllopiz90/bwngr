@@ -30,7 +30,8 @@ const getPlayers = async ()=> {
         })
         .then(async client => {
             await PlayersDAO.injectDB(client);
-            await PlayersDAO.insertPlayersBulk(dataArray)
+            const result = await PlayersDAO.insertPlayersBulk(dataArray)
+            console.log(result);
             client.close()
         });
 }
