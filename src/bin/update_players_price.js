@@ -17,6 +17,7 @@ const adjustPrice = async ({increment, id_bwngr, league = 'liga'}) => {
             .catch(err => {
                 console.error('=====Error:', err.toString());
                 console.error('=====Error stack:', err.stack);
+                client.close();
                 process.exit(1)
             })
             .then(async client => {
