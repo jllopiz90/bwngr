@@ -56,19 +56,19 @@ async function testPlayersDAO() {
             console.log('league missing, using la liga by default');
         }
         await PlayersDAO.injectDB(db);
-        const  player = await PlayersDAO.getPlayer(54);
+        const  player = await PlayersDAO.getPlayer(140);
         console.log(player);
         client.close();
     });
 
 }
 
-// testPlayersDAO();
+testPlayersDAO();
 // getPlayers();
 // getManagers();
 // getTeams();
 // getLeagueInfo();
-getRounds();
+// getRounds();
 
 
 // const fs = require('fs')

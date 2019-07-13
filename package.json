@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --passWithNoTests",
     "start": "nodemon ./index.js",
     "show_me": "babel-node src/bin/show_me.js",
     "add_managers": "babel-node src/bin/add_managers.js",
@@ -32,6 +32,7 @@
     "@babel/preset-env": "^7.5.0",
     "@babel/register": "^7.4.4",
     "@babel/runtime": "^7.5.1",
+    "jest": "^24.8.0",
     "nodemon": "^1.19.1"
   }
 }

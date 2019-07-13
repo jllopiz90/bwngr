@@ -14,7 +14,7 @@ export default class PlayersDAO {
 
     static async getPlayer(id_bwngr) {
         try {
-            return players.findOne({id_bwngr});
+            return players.findOne({id_bwngr: parseInt(id_bwngr)});
         } catch (e) {
             console.error(`Unable to get player.Erorr-- ${String(e)}`);
         }
