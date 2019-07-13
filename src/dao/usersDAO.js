@@ -2,13 +2,13 @@ let users;
 let sessions;
 
 export default class UsersDAO {
-  static async injectDB(conn) {
+  static async injectDB(db) {
     if (users && sessions) {
       return;
     }
     try {
-      users = await conn.db(process.env.BWNGR_DB).collection("users");
-      sessions = await conn.db(process.env.BWNGR_DB).collection("sessions");
+      users = await db.collection("users");
+      sessions = await db.collection("sessions");
     } catch (e) {
       console.error(`Unable to establish collection handles in userDAO: ${e}`);
     }

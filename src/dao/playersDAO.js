@@ -2,11 +2,11 @@
 let players;
 
 export default class PlayersDAO {
-    static async injectDB(conn) {
+    static async injectDB(db) {
         if(players)
             return;
         try{
-            players = await conn.db(process.env.BWNGR_DB).collection('players');
+            players = await db.collection('players');
         } catch(e) {
             console.error(`Unable to establish collection handles in playersDAO: ${e}`);
         }
@@ -60,11 +60,9 @@ export default class PlayersDAO {
 
     static async updatePrice({id_bwngr, increment}) {
         try {
-            console.log('id:',id_bwngr)
-            console.log('increment:',increment)
             const  { result }  = await players.updateOne(
-                {id_bwngr: id_bwngr},
-                {$inc: {price: increment}}
+                {id_bwngr: parseInt(id_bwngr) },
+                {$inc: { price: parseInt(increment) }}
             );
             return {
                 success: result.nModified === 1 && result.ok === 1

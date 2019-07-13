@@ -1,12 +1,12 @@
 let managers;
 
 export default class ManagersDAO {
-    static async injectDB(conn) {
+    static async injectDB(db) {
       if (managers) {
         return;
       }
       try {
-        managers = await conn.db(process.env.BWNGR_DB).collection("managers");
+        managers = await db.collection("managers");
       } catch (e) {
         console.error(`Unable to establish collection handles in managersDAO: ${e}`);
       }
@@ -105,10 +105,10 @@ export default class ManagersDAO {
     }
   }
 
-  static async setBalancePlayer({amount, id_bwgnr}) {
+  static async setBalancePlayer({amount, id_bwngr}) {
     try {
       const { result } =  await managers.updateOne(
-        {id_bwgnr},
+        {id_bwngr: parseInt(id_bwngr)},
         {
           $set:{ balance: parseInt(amount) }
         }
