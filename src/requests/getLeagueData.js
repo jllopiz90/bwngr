@@ -2,7 +2,10 @@
 import axios from 'axios';
 
 export default class GetLeageData {
-    constructor() {
+    constructor(league='liga') {
+        const leagueHeader = league === 'pl' ? process.env.BWNGR_PL_LEAGUE : process.env.BWNGR_LEAGUE;
+        const userHeader = league === 'pl' ? process.env.BWNGR_PL_USER : process.env.BWNGR_USER;
+        this.league = league;
         this.client = axios.create({
             baseURL: 'https://biwenger.as.com/api/v2',
             timeout: 10000,
@@ -11,8 +14,8 @@ export default class GetLeageData {
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
                 'X-Version': '569',
-                'X-League': process.env.BWNGR_LEAGUE,
-                'X-User': process.env.BWNGR_USER,
+                'X-League': leagueHeader,
+                'X-User': userHeader,
                 'X-Lang': 'en'
             }
         });
@@ -29,7 +32,8 @@ export default class GetLeageData {
 
     async getPlayers(){
         try {
-            const   { data: { data: {players} } }   = await this.client.get('/competitions/la-liga/data?lang=es&score=1');
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
+            const   { data: { data: {players} } }   = await this.client.get(uri);
             return {success: true, message: players};
         } catch(e) {
             console.error(`Error ocurred while getting players from bwnger.--${e}`);

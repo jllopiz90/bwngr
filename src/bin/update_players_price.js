@@ -7,8 +7,9 @@ import { MongoClient } from "mongodb";
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
 let args = process.argv.slice(2);
+const isInt = (value) => Number.isInteger(parseInt(value));
 
-const adjustPrice = async ({increment = '', id_bwngr = ''}) => {
+const adjustPrice = async ({increment, id_bwngr, league = 'liga'}) => {
     try{
         MongoClient.connect(
             process.env.BWNGR_DB_URI,
@@ -20,10 +21,11 @@ const adjustPrice = async ({increment = '', id_bwngr = ''}) => {
             })
             .then(async client => {
                 let result;
-                await PlayersDAO.injectDB(client);
+                const db = league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
+                await PlayersDAO.injectDB(db);
                 console.log('increment:',increment)
                 console.log('id:',id_bwngr)
-                result = await PlayersDAO.updatePrice({id_bwngr: parseInt(id_bwngr), increment: parseInt(increment)})
+                result = await PlayersDAO.updatePrice({id_bwngr: id_bwngr, increment: increment})
                 console.log(result);
                 client.close()
             });
@@ -33,10 +35,18 @@ const adjustPrice = async ({increment = '', id_bwngr = ''}) => {
     }
 }
 
-if(args.length > 1) {
-    const [increment, id_bwngr] =args;
-    adjustPrice({increment, id_bwngr});
-}else {
+if(args.length > 2) {
+    const [league, increment, id_bwngr] =args;
+    adjustPrice({increment, id_bwngr, league});
+} else if(args.length > 1){
+    if(isInt(args[0]) && isInt(args[1])){
+        console.log('missing params, using la liga by default');
+        const [increment, id_bwngr] = args;
+        adjustPrice({increment,id_bwngr});
+    } else {
+        console.log('missing params or wrong type of params');
+    }
+} else{
     console.log('missing params');
 }
 
