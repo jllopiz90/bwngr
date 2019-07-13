@@ -39,4 +39,24 @@ export default class GetLeageData {
             console.error(`Error ocurred while getting players from bwnger.--${e}`);
         }
     }
+
+    async getTeams(){
+        try {
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
+            const   { data: {data: {teams}} }   = await this.client.get(uri);
+            return {success: true, message: teams};
+        } catch(e) {
+            console.error(`Error ocurred while getting league info from bwnger.--${e}`);
+        }
+    }
+
+    async getLeagueInfo(){
+        try {
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
+            const   { data }   = await this.client.get(uri);
+            return {success: true, message: data};
+        } catch(e) {
+            console.error(`Error ocurred while getting league info from bwnger.--${e}`);
+        }
+    }
 }

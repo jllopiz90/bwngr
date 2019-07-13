@@ -9,6 +9,7 @@
     "show_me": "babel-node src/bin/show_me.js",
     "add_managers": "babel-node src/bin/add_managers.js",
     "add_players": "babel-node src/bin/add_players.js",
+    "add_teams": "babel-node src/bin/add_teams.js",
     "set_balance": "babel-node src/bin/set_balance.js",
     "update_prices": "babel-node src/bin/update_players_price.js"
   },

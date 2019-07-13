@@ -26,7 +26,7 @@ const getTeams = async (league = 'liga')=> {
         .then(async client => {
             const db = league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
             await TeamsDAO.injectDB(db);
-            const result = await TeamsDAO.insertTeamsBulk(dataArray)
+            const result = await TeamsDAO.insertTeamsBulk(dataArray);
             console.log(result);
             client.close()
         });

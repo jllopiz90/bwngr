@@ -80,6 +80,7 @@ export default class ManagersDAO {
         return { insertOne: { 'document': managerInfo}}
       });
       const result = await managers.bulkWrite(insertOperations);
+      console.log(result)
       return {success: result.insertedCount === managersInfo.length}
     }catch(e) {
       console.error(`Error ocurred while inserting in bulk.-- ${e}`);
