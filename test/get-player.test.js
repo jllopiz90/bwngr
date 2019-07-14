@@ -24,3 +24,5 @@ describe("Get player from DB", () => {
     })
 
 })
+
+//npm test -t get-player    <======= command to run test

@@ -63,8 +63,8 @@ async function testPlayersDAO() {
 
 }
 
-testPlayersDAO();
-// getPlayers();
+// testPlayersDAO();
+getPlayers();
 // getManagers();
 // getTeams();
 // getLeagueInfo();

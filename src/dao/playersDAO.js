@@ -45,13 +45,16 @@ export default class PlayersDAO {
         }
     }
 
-    static async insertPlayersBulk(playersInfo) {
+    static async upsertPlayersBulk(playersInfo) {
         try {
-            const insertOperations = playersInfo.map( elem => {
-                return {insertOne: {'document': elem}};
-            });
-            const result = await players.bulkWrite(insertOperations);
-            return {success: result.insertedCount === playersInfo.length};   
+            const upsertOperations = playersInfo.map( elem => 
+                ({ updateOne: { 
+                    filter: { id_bwngr: elem.id_bwngr}, 
+                    update: { $set: elem }, upsert: true } 
+                 })
+            );
+            const result = await players.bulkWrite(upsertOperations);
+            return {success: result.ok === 1, message: 'Players upserted!'};   
         } catch (e) {
             console.error(`Unable to bulk insert players.Error-- ${String(e)}`);
             return {success: false, message: 'Unable to bulk insert players'};

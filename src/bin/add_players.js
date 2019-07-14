@@ -18,7 +18,7 @@ const getPlayers = async (league = 'liga')=> {
             team_id: player.teamID,
             position: playerPositions[player.position - 1],
             price: player.price,
-            fantasyPrice: player.fantasyPrice,
+            // fantasyPrice: player.fantasyPrice,
             price_increment: player.priceIncrement,
     }));
     MongoClient.connect(
@@ -33,7 +33,7 @@ const getPlayers = async (league = 'liga')=> {
         .then(async client => {
             const db = league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
             await PlayersDAO.injectDB(db);
-            const result = await PlayersDAO.insertPlayersBulk(dataArray)
+            const result = await PlayersDAO.upsertPlayersBulk(dataArray)
             console.log(result);
             client.close()
         });
