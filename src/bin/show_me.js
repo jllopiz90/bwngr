@@ -1,6 +1,7 @@
 'use strict'
 require("dotenv").config();
 import 'core-js/stable';
+import moment from 'moment';
 import { MongoClient } from 'mongodb';
 import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
@@ -18,6 +19,30 @@ async function getPlayers() {
     const handleLeage = new GetLeagueData(league);
     const { message: data} = await handleLeage.getPlayers();
     console.log(data)
+}
+
+let client;
+async function getPlayer(id) {
+    try {
+        if(!client) {
+            client = await MongoClient.connect(
+                process.env.BWNGR_DB_URI,
+                {poolSize: 100, useNewUrlParser: true }
+            );
+        }
+        const db = league !== 'undefined' && league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
+        if(!league){
+            console.log('league missing, using la liga by default');
+        }
+        await PlayersDAO.injectDB(db);
+        const  player = await PlayersDAO.getPlayer(id);
+        return player;
+    } catch (e) {
+        console.error('=====Error:', e.toString());
+        console.error('=====Error stack:', e.stack);
+        client.close();
+        process.exit(1)
+    }
 }
 
 async function getTeams() {
@@ -39,6 +64,37 @@ async function getManagers() {
 async function getRounds(){
     const { data: {season} } = await getLeagueInfo();
     console.log(season);
+}
+
+async function getTransactions() {
+    const has = Object.prototype.hasOwnProperty;
+    const handleLeage = new GetLeagueData(league);
+    const resp = await handleLeage.getTransactions(0,50);
+    // console.log(resp.message.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
+    let counter = 1;
+    let filtered =  resp.message;//.filter( x => x.type === 'transfer');
+    for(let i =0; i < filtered.length; i++){
+        for(let j = 0; j < filtered[i].content.length; j++){
+            const player = await getPlayer(filtered[i].content[j].player);
+            const type = filtered[i].type;
+            const move = type === 'transfer' ? filtered[i].content[j].from : filtered[i].content[j].to;
+            const moveTo = type === 'transfer' && has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
+            const amount = filtered[i].content[j].amount;
+            console.log(`deal ${counter}: `,{
+                type: type,
+                player: player && has.call(player,'name') ? player.name : 'player is not in the league',
+                date: filtered[i].date,//new Date(filtered[i].date*1000),
+                moveDirection:  type === 'transfer' ? 'from' : 'to',
+                moveFrom: type === 'transfer' ? move : 'none',
+                moveTo: type === 'market' ? move : moveTo, 
+                amount: amount,
+                bids: has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids : 'none',
+                firstBidUser:has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids[0].user : 'none'
+            });
+            counter ++;
+        }
+    }
+    client.close();
 }
 
 async function testPlayersDAO() {
@@ -63,13 +119,31 @@ async function testPlayersDAO() {
 
 }
 
+function playWithDates(){
+    const date1 = moment('2019-05-18');
+    const date2 = moment(1558167418*1000);
+    const date3 = moment.unix(1558167418,'MM-DD-YYYY', true)
+    console.log(date1)
+    console.log(date2.format('MM-DD-YYYY'))
+    console.log(date3.format('MM-DD-YYYY'))
+    console.log(date1.isSame(date2, 'day'))
+    console.log(date1.isSame(date3,'day'))
+}
+
+const auxFunc = async () => {
+    const player = await getPlayer(9685);
+    console.log(player)
+}
+
+// playWithDates();
+getTransactions();
+// auxFunc();
 // testPlayersDAO();
-getPlayers();
+// getPlayers();
 // getManagers();
 // getTeams();
 // getLeagueInfo();
 // getRounds();
-
 
 // const fs = require('fs')
 // const Token = require('../includes/auth/token')
