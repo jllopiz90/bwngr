@@ -23,40 +23,77 @@ export default class GetLeageData {
 
     async getManagers(){
         try {
-            const   { data: { data: { standings } } } = await this.client.get('/league?fields=standings');
+            const   { data: { data: { standings } } } = await this.client.get('/league',{
+                params: {
+                    fields: 'standings'
+                }
+            });
             return {success: true, message: standings};
         } catch(e) {
-            console.error(`Error ocurred while getting users from bwnger.-- ${e}`);
+            console.error(`Error ocurred while getting users from bwnger.-- ${String(e)}`);
         }
     }
 
     async getPlayers(){
         try {
-            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
-            const   { data: { data: {players} } }   = await this.client.get(uri);
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
+            const   { data: { data: {players} } }   = await this.client.get(uri,{
+                params: {
+                    lang: 'en',
+                    score: '1'
+                }
+            });
             return {success: true, message: players};
         } catch(e) {
-            console.error(`Error ocurred while getting players from bwnger.--${e}`);
+            console.error(`Error ocurred while getting players from bwnger.--${String(e)}`);
         }
     }
 
     async getTeams(){
         try {
-            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
-            const   { data: {data: {teams}} }   = await this.client.get(uri);
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
+            const   { data: {data: {teams}} }   = await this.client.get(uri,{
+                params: {
+                    lang: 'en',
+                    score: '1'
+                }
+            });
             return {success: true, message: teams};
         } catch(e) {
-            console.error(`Error ocurred while getting league info from bwnger.--${e}`);
+            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
+        }
+    }
+
+    async getTransactions(offSet,limit) {
+        try {
+            const uri = 'league/board';
+            const { data: {data}} = await this.client.get(uri,{
+                params: {
+                    type:'transfer,market,exchange,loan,loanReturn,clauseIncrement',
+                    offset: offSet,
+                    limit: limit
+                }
+            });
+            return {
+                success: true, message: data
+            };
+        } catch (e) {
+            console.error(`Error ocurred while getting transactions.Error--${String(e)}`)
         }
     }
 
     async getLeagueInfo(){
         try {
-            const uri = this.league === 'pl' ? '/competitions/premier-league/data?lang=es&score=1' : '/competitions/la-liga/data?lang=es&score=1';
-            const   { data }   = await this.client.get(uri);
+            const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
+            const   { data }   = await this.client.get(uri,{
+                params: {
+                    lang: 'en',
+                    score: '1'
+                }
+            });
             return {success: true, message: data};
         } catch(e) {
-            console.error(`Error ocurred while getting league info from bwnger.--${e}`);
+            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
         }
     }
 }
