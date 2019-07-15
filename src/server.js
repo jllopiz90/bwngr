@@ -6,7 +6,6 @@ import ManagersDAO from "./dao/managersDAO";
 import PlayersDAO from "./dao/playersDAO";
 import router from './routing/routeManager';
 
-const port = process.env.PORT || 8000
 const FORM_URLENCODED = 'application/x-www-form-urlencoded';
 const has = Object.prototype.hasOwnProperty;
 console.log('running ...');
