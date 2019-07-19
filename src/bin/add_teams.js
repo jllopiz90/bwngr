@@ -6,6 +6,11 @@ import TeamsDAO from '../dao/teamsDAO';
 import { MongoClient } from "mongodb";
 
 const [league] = process.argv.slice(2);
+const dbs = {
+    'test': process.env.BWNGR_DB_TEST,
+    'liga': process.env.BWNGR_DB,
+    'pl': process.env.BWNGR_DB_PL
+};
 
 const getTeams = async (league = 'liga')=> {
     const handleLeage = new GetLeagueData(league);
@@ -24,7 +29,7 @@ const getTeams = async (league = 'liga')=> {
             process.exit(1)
         })
         .then(async client => {
-            const db = league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
+            const db = client.db(dbs[league]);
             await TeamsDAO.injectDB(db);
             const result = await TeamsDAO.insertTeamsBulk(dataArray);
             console.log(result);

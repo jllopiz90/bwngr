@@ -7,6 +7,11 @@ import { MongoClient } from "mongodb";
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
 let args = process.argv.slice(2);
+const dbs = {
+    'test': process.env.BWNGR_DB_TEST,
+    'liga': process.env.BWNGR_DB,
+    'pl': process.env.BWNGR_DB_PL
+};
 const isInt = (value) => Number.isInteger(parseInt(value));
 
 const setBalance = async ({amount = '', id_bwngr = '', league= 'liga'}) => {

@@ -1,10 +1,20 @@
 'use strict';
+require("dotenv").config();
 import axios from 'axios';
-
+const leagues = {
+    'test': process.env.BWNGR_TEST_LEAGUE,
+    'liga': process.env.BWNGR_LEAGUE,
+    'pl': process.env.BWNGR_PL_LEAGUE
+};
+const users = {
+    'test': process.env.BWNGR_TEST_USER,
+    'liga': process.env.BWNGR_USER,
+    'pl': process.env.BWNGR_PL_USER
+};
 export default class GetLeageData {
     constructor(league='liga') {
-        const leagueHeader = league === 'pl' ? process.env.BWNGR_PL_LEAGUE : process.env.BWNGR_LEAGUE;
-        const userHeader = league === 'pl' ? process.env.BWNGR_PL_USER : process.env.BWNGR_USER;
+        const leagueHeader = leagues[league];
+        const userHeader = users[league];
         this.league = league;
         this.client = axios.create({
             baseURL: 'https://biwenger.as.com/api/v2',
@@ -13,7 +23,7 @@ export default class GetLeageData {
                 authorization: process.env.BWNGR_BEARER,
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
-                'X-Version': '569',
+                'X-Version': '574',
                 'X-League': leagueHeader,
                 'X-User': userHeader,
                 'X-Lang': 'en'
@@ -69,7 +79,7 @@ export default class GetLeageData {
             const uri = 'league/board';
             const { data: {data}} = await this.client.get(uri,{
                 params: {
-                    type:'transfer,market,exchange,loan,loanReturn,clauseIncrement',
+                    type:'transfer,market,exchange,loan,loanReturn,clauseIncrement,auctions',
                     offset: offSet,
                     limit: limit
                 }

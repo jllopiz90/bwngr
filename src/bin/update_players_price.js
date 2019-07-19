@@ -7,6 +7,11 @@ import { MongoClient } from "mongodb";
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
 let args = process.argv.slice(2);
+const dbs = {
+    'test': process.env.BWNGR_DB_TEST,
+    'liga': process.env.BWNGR_DB,
+    'pl': process.env.BWNGR_DB_PL
+};
 const isInt = (value) => Number.isInteger(parseInt(value));
 
 const adjustPrice = async ({increment, id_bwngr, league = 'liga'}) => {
@@ -22,7 +27,7 @@ const adjustPrice = async ({increment, id_bwngr, league = 'liga'}) => {
             })
             .then(async client => {
                 let result;
-                const db = league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
+                const db = client.db(dbs[league]);
                 await PlayersDAO.injectDB(db);
                 console.log('increment:',increment)
                 console.log('id:',id_bwngr)

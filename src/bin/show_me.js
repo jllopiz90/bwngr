@@ -7,6 +7,11 @@ import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
 
 let [league] = process.argv.slice(2);
+const dbs = {
+    'test': process.env.BWNGR_DB_TEST,
+    'liga': process.env.BWNGR_DB,
+    'pl': process.env.BWNGR_DB_PL
+};
 
 async function getLeagueInfo() {
     const handleLeage = new GetLeagueData(league);
@@ -70,23 +75,22 @@ async function getTransactions() {
     const has = Object.prototype.hasOwnProperty;
     const handleLeage = new GetLeagueData(league);
     const resp = await handleLeage.getTransactions(0,50);
-    // console.log(resp.message.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
+    // console.log(resp.message[0].content)//.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
     let counter = 1;
     let filtered =  resp.message;//.filter( x => x.type === 'transfer');
     for(let i =0; i < filtered.length; i++){
         for(let j = 0; j < filtered[i].content.length; j++){
             const player = await getPlayer(filtered[i].content[j].player);
             const type = filtered[i].type;
-            const move = type === 'transfer' ? filtered[i].content[j].from : filtered[i].content[j].to;
-            const moveTo = type === 'transfer' && has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
+            const moveFrom = has.call(filtered[i].content[j],'from') ? filtered[i].content[j].from : 'market';
+            const moveTo = has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
             const amount = filtered[i].content[j].amount;
             console.log(`deal ${counter}: `,{
                 type: type,
                 player: player && has.call(player,'name') ? player.name : 'player is not in the league',
                 date: filtered[i].date,//new Date(filtered[i].date*1000),
-                moveDirection:  type === 'transfer' ? 'from' : 'to',
-                moveFrom: type === 'transfer' ? move : 'none',
-                moveTo: type === 'market' ? move : moveTo, 
+                moveFrom:moveFrom,
+                moveTo: moveTo, 
                 amount: amount,
                 bids: has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids : 'none',
                 firstBidUser:has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids[0].user : 'none'
@@ -107,9 +111,9 @@ async function testPlayersDAO() {
         client.close();
         process.exit(1)
     }).then( async client => {
-        const db = league !== 'undefined' && league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
+        const db = league !== 'undefined' ? client.db(dbs[league]) : client.db(process.env.BWNGR_DB_TEST);
         if(!league){
-            console.log('league missing, using la liga by default');
+            console.log('league missing, using test liga by default');
         }
         await PlayersDAO.injectDB(db);
         const  player = await PlayersDAO.getPlayer(140);
@@ -121,11 +125,12 @@ async function testPlayersDAO() {
 
 function playWithDates(){
     const date1 = moment('2019-05-18');
-    const date2 = moment(1558167418*1000);
-    const date3 = moment.unix(1558167418,'MM-DD-YYYY', true)
+    const date2 = moment();//moment(1563505304*1000);
+    const date3 = moment.unix(1563510940,'MM-DD-YYYY', true)
     console.log(date1)
     console.log(date2.format('MM-DD-YYYY'))
     console.log(date3.format('MM-DD-YYYY'))
+    console.log('date 2 equals to date 3?==>',date2.format('MM-DD-YYYY') === date3.format('MM-DD-YYYY')) // returns true at the moment because it was at the same day
     console.log(date1.isSame(date2, 'day'))
     console.log(date1.isSame(date3,'day'))
 }
@@ -135,8 +140,8 @@ const auxFunc = async () => {
     console.log(player)
 }
 
-// playWithDates();
-getTransactions();
+playWithDates();
+// getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
