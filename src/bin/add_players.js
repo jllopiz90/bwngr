@@ -1,6 +1,7 @@
 'use strict'
 require("dotenv").config();
 import 'core-js/stable';
+import moment from 'moment';
 import GetLeagueData from '../requests/getLeagueData';
 import PlayersDAO from '../dao/playersDAO';
 import { MongoClient } from "mongodb";
@@ -16,6 +17,8 @@ const dbs = {
 const getPlayers = async (league = 'liga')=> {
     const handleLeage = new GetLeagueData(league);
     const { message: data} = await handleLeage.getPlayers();
+    const currentYear = moment().year();
+    const initDate = `07-20-${currentYear}`;
     const dataArray = Object.values(data).map( player => ({
             id_bwngr:  player.id,
             name: player.name,
@@ -23,28 +26,30 @@ const getPlayers = async (league = 'liga')=> {
             team_id: player.teamID,
             position: playerPositions[player.position - 1],
             price: player.price,
-            // fantasyPrice: player.fantasyPrice,
             price_increment: player.priceIncrement,
+            owner: 'market',
+            own_since: initDate
     }));
     MongoClient.connect(
         process.env.BWNGR_DB_URI,
         { useNewUrlParser: true })
         .catch(err => {
-            console.error('=====Error:', String(err));
-            console.error('=====Error stack:', err.stack);
+            console.error('\x1b[31m =====Error:', String(err));
+            console.error('\x1b[31m =====Error stack:', err.stack);
             client.close();
             process.exit(1)
         })
         .then(async client => {
             const db = client.db(dbs[league]);
             await PlayersDAO.injectDB(db);
-            const result = await PlayersDAO.upsertPlayersBulk(dataArray)
-            console.log(result);
+            const result = await PlayersDAO.insertPlayersBulk(dataArray)
+            console.log(result);   
             client.close()
         });
 }
 
 if(league){
+    console.log(`using league ${league}`);
     getPlayers(league);
 }else{
     console.log('missing params using la liga by default');

@@ -149,9 +149,12 @@ async function testPlayersDAO() {
 }
 
 function playWithDates(){
+    const currentYear = moment().year();
+    const initDate = `07-20-${currentYear}`;
     const date1 = moment('2019-05-18');
     const date2 = moment(1563685607*1000);
     const date3 = moment.unix(1563593436,'MM-DD-YYYY')
+    console.log(`init date: ${initDate}`)
     console.log(date1)
     console.log(date2.format('MM-DD-YYYY'))
     console.log(date3.format('MM-DD-YYYY'))
@@ -165,8 +168,8 @@ const auxFunc = async () => {
     console.log(player)
 }
 
-// playWithDates();
-getTransactions();
+playWithDates();
+// getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
