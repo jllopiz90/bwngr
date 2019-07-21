@@ -18,7 +18,7 @@ const getPlayers = async (league = 'liga')=> {
     const handleLeage = new GetLeagueData(league);
     const { message: data} = await handleLeage.getPlayers();
     const currentYear = moment().year();
-    const initDate = `07-20-${currentYear}`;
+    const initDate = league === 'test' ? `07-16-${currentYear}` : `07-20-${currentYear}`;
     const dataArray = Object.values(data).map( player => ({
             id_bwngr:  player.id,
             name: player.name,
