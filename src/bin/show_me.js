@@ -40,8 +40,8 @@ async function getPlayer(id) {
             console.log('league missing, using la liga by default');
         }
         await PlayersDAO.injectDB(db);
-        const  player = await PlayersDAO.getPlayer(id);
-        return player;
+        console.log('\x1b[34m','id:',id,'\x1b[0m')
+        return await PlayersDAO.getPlayer({id_bwngr: parseInt(id)},{projection: {_id: 0, name: 1}});
     } catch (e) {
         console.error('=====Error:', e.toString());
         console.error('=====Error stack:', e.stack);
@@ -72,33 +72,58 @@ async function getRounds(){
 }
 
 async function getTransactions() {
+    console.time("startTrans");
+    console.timeLog("startTrans", "Starting fetching data …");
     const has = Object.prototype.hasOwnProperty;
-    const handleLeage = new GetLeagueData(league);
-    const resp = await handleLeage.getTransactions(0,50);
-    // console.log(resp.message[0].content)//.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
-    let counter = 1;
-    let filtered =  resp.message;//.filter( x => x.type === 'transfer');
-    for(let i =0; i < filtered.length; i++){
-        for(let j = 0; j < filtered[i].content.length; j++){
-            const player = await getPlayer(filtered[i].content[j].player);
-            const type = filtered[i].type;
-            const moveFrom = has.call(filtered[i].content[j],'from') ? filtered[i].content[j].from : 'market';
-            const moveTo = has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
-            const amount = filtered[i].content[j].amount;
-            console.log(`deal ${counter}: `,{
-                type: type,
-                player: player && has.call(player,'name') ? player.name : 'player is not in the league',
-                date: filtered[i].date,//new Date(filtered[i].date*1000),
-                moveFrom:moveFrom,
-                moveTo: moveTo, 
-                amount: amount,
-                bids: has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids : 'none',
-                firstBidUser:has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids[0].user : 'none'
-            });
-            counter ++;
+    try {
+        const handleLeage = new GetLeagueData(league);
+        const resp = await handleLeage.getTransactions(0,50);
+        console.timeLog("startTrans", "data fetched");
+        // console.log(resp.message[0].content)//.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
+        let counter = 1;
+        let filtered =  resp.message;//.filter( x => moment.unix(x.date).format('MM-DD-YYYY') === moment('2019-07-19').format('MM-DD-YYYY'));
+        // console.log(filtered)
+        console.log('should has bids:' , filtered[1].content[0])
+        console.log('\x1b[34m','has bids',has.call(filtered[1].content[0],'bids'), '\x1b[0m')
+        for(let i =0; i < filtered.length; i++){
+            for(let j = 0; j < filtered[i].content.length; j++) {
+                const result = await getPlayer(filtered[i].content[j].player);
+                const player = has.call(result, 'found') && !result.found ? 'player is not in the league' : result[0].name;
+                const type = filtered[i].type;
+                const moveFrom = has.call(filtered[i].content[j],'from') ? filtered[i].content[j].from : 'market';
+                const moveTo = has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
+                const amount = filtered[i].content[j].amount;
+                const [{price}] = await PlayersDAO.getPlayerCurrentPrice({id_bwngr: parseInt(filtered[i].content[j].player)}, {projection: {_id: 0, price: 1}});
+                console.log('price:',price)
+                console.log('\x1b[34m','has bids',has.call(filtered[i].content[j],'bids'), '\x1b[0m')
+                console.log(`deal ${counter}: `,{
+                    type: type,
+                    player: player ,
+                    date: filtered[i].date,//new Date(filtered[i].date*1000),
+                    moveFrom:moveFrom,
+                    moveTo: moveTo,
+                    amount: amount,
+                    bids: has.call(filtered[i].content[j],'bids') ? filtered[i].content[j].bids.map( bid => ({
+                        player: filtered[i].content[j].player,
+                        manager: bid.user.id,
+                        amount: bid.amount,
+                        overprice: parseInt(bid.amount) - parseInt(price),
+                        date: filtered[i].date
+                        })) : 'none'
+                    });
+                counter ++;
+            }
         }
+        client.close();
+        console.timeEnd("startTrans",  'Client closed.');
+    } catch (e) {
+        console.log('\x1b[31m',`A problem ocurred while getting transactions.Error--  ${String(e)}`);
+        console.log('\x1b[31m',`=====Error stack: ${String(e.stack)}`, '\x1b[0m');
+        client.close();
+        console.timeEnd("startTrans",  'Client closed.');
+        process.exit(1)
     }
-    client.close();
+    
 }
 
 async function testPlayersDAO() {
@@ -125,8 +150,8 @@ async function testPlayersDAO() {
 
 function playWithDates(){
     const date1 = moment('2019-05-18');
-    const date2 = moment();//moment(1563505304*1000);
-    const date3 = moment.unix(1563510940,'MM-DD-YYYY', true)
+    const date2 = moment(1563685607*1000);
+    const date3 = moment.unix(1563593436,'MM-DD-YYYY')
     console.log(date1)
     console.log(date2.format('MM-DD-YYYY'))
     console.log(date3.format('MM-DD-YYYY'))
@@ -140,8 +165,8 @@ const auxFunc = async () => {
     console.log(player)
 }
 
-playWithDates();
-// getTransactions();
+// playWithDates();
+getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
