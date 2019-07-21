@@ -19,7 +19,7 @@ describe("Get player from DB", () => {
     });
 
     test("Should return Pique", async () => {
-        const player = await PlayersDAO.getPlayer(id_bwngr);
+        const [player] = await PlayersDAO.getPlayer({id_bwngr});
         expect(player.slug).toBe('pique')
     })
 

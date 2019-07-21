@@ -12,11 +12,23 @@ export default class PlayersDAO {
         }
     }
 
-    static async getPlayer(id_bwngr) {
+    static async getPlayer(filter = {}, projection = {}) {
         try {
-            return await players.findOne({id_bwngr: parseInt(id_bwngr)});
+            const cursor = await players.find(filter, projection);
+            return cursor ? cursor.toArray() : { found: false };
         } catch (e) {
-            console.error(`Unable to get player.Erorr-- ${String(e)}`);
+            console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
+            return {success: false, message: 'Unable to get player.'};
+        }
+    }
+
+    static async getPlayerCurrentPrice(filter = {}, projection = {}) {
+        try {
+            const cursor = await players.find(filter, projection);
+            return cursor ? cursor.toArray() : {found: false}
+        } catch (e) {
+            console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
+            return {success: false, message: 'Unable to get player price.'};
         }
     }
 
