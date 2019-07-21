@@ -92,6 +92,22 @@ export default class GetLeageData {
         }
     }
 
+    async getCurrentMarket() {
+        try {
+            const uri = 'market';
+            const { data: {data: {sales}}} = await this.client.get(uri);
+            const salesFormatted = sales.map( sale => ({
+                player: sale.player.id,
+                price: sale.price
+            }));
+            return {
+                success: true, message: salesFormatted
+            };
+        } catch (e) {
+            console.error(`Error ocurred while getting transactions.Error--${String(e)}`)
+        }
+    }
+
     async getLeagueInfo(){
         try {
             const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';

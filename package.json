@@ -12,7 +12,8 @@
     "add_teams": "babel-node src/bin/add_teams.js",
     "set_balance": "babel-node src/bin/set_balance.js",
     "update_prices": "babel-node src/bin/update_players_price.js",
-    "get_transfers": "babel-node src/bin/get_transfers.js"
+    "get_transfers": "babel-node src/bin/get_transfers.js",
+    "display_market": "babel-node src/bin/display_current_market.js"
   },
   "keywords": [],
   "author": "churchillW <chuchilenin@gmail.com>",
