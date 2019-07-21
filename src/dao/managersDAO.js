@@ -17,14 +17,15 @@ export default class ManagersDAO {
    * @param {string} name - The name of the desired manager
    * @returns {Object | null} Returns either a single manager or nothing
    */
-  static async getManager(name) {
+  static async getManager(filter = {}, projection = {}) {
     try {
       return {
         success: true,
-        message: await managers.findOne({ name })
+        message: await managers.find(filter, projection)
       }
-    } catch (error) {
-      console.error(`Unable to get manager.--Error: ${String(e)}`); 
+    } catch (e) {
+      console.error(`\x1b[31m Unable to get manager.--Error: ${String(e)}`); 
+      console.error(`--Error Stack: ${String(e.stack)} \x1b[0m`); 
       return {
         success: false,
         message: 'Unable to get manager'

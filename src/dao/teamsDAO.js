@@ -15,7 +15,7 @@ export default class TeamsDAO{
 
     static async getTeam(id_bwngr){
         try {
-            const team = await teams.findOne({id_bwngr:parseInt(id_bwngr)});
+            const team = await teams.findOne({id_bwngr:parseInt(id_bwngr)}, {projection: {_id:0, name: 1}});
             return {
                 success: true,
                 message: team

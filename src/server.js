@@ -4,6 +4,8 @@ import { MongoClient } from "mongodb";
 import UsersDAO from "./dao/usersDAO";
 import ManagersDAO from "./dao/managersDAO";
 import PlayersDAO from "./dao/playersDAO";
+import TransfersDAO from "./dao/transfersDAO";
+import TeamsDAO from "./dao/teamsDAO";
 import router from './routing/routeManager';
 
 const FORM_URLENCODED = 'application/x-www-form-urlencoded';
@@ -39,6 +41,8 @@ export default http.createServer((req, res) => {
                 await UsersDAO.injectDB(db);
                 await PlayersDAO.injectDB(db);
                 await ManagersDAO.injectDB(db);
+                await TransfersDAO.injectDB(db);
+                await TeamsDAO.injectDB(db);
                 const result = await router.handleRoute(url, params);
                 res.end(JSON.stringify(result));
             });
