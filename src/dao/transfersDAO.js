@@ -40,20 +40,15 @@ export default class TransfersDAO {
         }
     }
 
-    static async insertTransfersBulk(transfersInfo) {
+    static async insertTransfersByDate(transfersInfo, date) {
         try {
-            // const insertOperations = transfersInfo.map( elem => {
-            //     return {insertOne: {'document': elem}};
-            // });
-            const upsertOperations = transfersInfo.map( elem => 
-                ({ updateOne: { 
-                    filter: { type: elem.type, player: elem.player, moveFrom: elem.moveFrom, moveTo: elem.moveFrom, date: elem.date}, 
-                    update: { $set: {amount: elem.amount} }, upsert: true } 
-                 })
-            );
-            const result = await transfers.bulkWrite(upsertOperations);
+            await transfers.removeMany({date});
+            const insertOperations = transfersInfo.map( elem => {
+                return {insertOne: {'document': elem}};
+            });
+            const result = await transfers.bulkWrite(insertOperations);
             return {
-                success: result.ok === 1,
+                success: result.insertedCount === transfersInfo.length,
                 message: 'Transactions added.'
             }
         } catch (e) {
@@ -63,20 +58,15 @@ export default class TransfersDAO {
         }
     }
 
-    static async insertBidsBulk(BidsInfo) {
+    static async insertBidsByDate(bidsInfo, date) {
         try {
-            // const insertOperations = BidsInfo.map( elem => {
-            //     return {insertOne: {'document': elem}};
-            // });
-            const upsertOperations = BidsInfo.map( elem => 
-                ({ updateOne: { 
-                    filter: { player: elem.player, manager: elem.manager, amount: elem.amount, date: elem.date}, 
-                    update: { $set: elem }, upsert: true } 
-                 })
-            );
-            const result = await bids.bulkWrite(upsertOperations);
+            await bids.removeMany({date});
+            const insertOperations = bidsInfo.map( elem => {
+                return {insertOne: {'document': elem}};
+            });
+            const result = await bids.bulkWrite(insertOperations);
             return {
-                success: result.ok === 1,
+                success: result.insertedCount === bidsInfo.length,
                 message: 'Bids added.'
             }
         } catch (e) {

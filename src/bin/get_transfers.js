@@ -28,11 +28,13 @@ const getFormattedDeals = async deals => {
     for(let i = 0; i < deals.length; i++) {
         for(let j = 0; j < deals[i].content.length; j++) {
             const date = moment.unix(deals[i].date).format('MM-DD-YYYY');
+            const from = has.call(deals[i].content[j],'from') ? deals[i].content[j].from.id : 'market';
+            const to = has.call(deals[i].content[j],'to') ? deals[i].content[j].to.id : 'market';
             formattedDeals.push({
                 type: mapTransactionsName[deals[i].type],
                 player: deals[i].content[j].player,
-                moveFrom: has.call(deals[i].content[j],'from') ? deals[i].content[j].from.id : 'market',
-                moveTo: has.call(deals[i].content[j],'to') ? deals[i].content[j].to.id : 'market', 
+                moveFrom: from,
+                moveTo: to, 
                 amount: deals[i].content[j].amount,
                 date
             });
@@ -67,7 +69,7 @@ const  getTransfers = async league => {
         await PlayersDAO.injectDB(db);
         await TransfersDAO.injectDB(db);
         const [formattedDeals, bids] = await getFormattedDeals(dealsFiltered);
-        let result = formattedDeals.length ? await TransfersDAO.insertTransfersBulk(formattedDeals) : 'no deals to insert';
+        let result = formattedDeals.length ? await TransfersDAO.insertTransfersByDate(formattedDeals,date_moment) : 'no deals to insert';
         console.log('deals insert status: ',result);
         const formattedAndFilteredDeals = formattedDeals.filter(deal => deal.type === 'purchase');
         for (let i = 0; i < formattedAndFilteredDeals.length; i++) {
@@ -81,12 +83,12 @@ const  getTransfers = async league => {
                 date: deal.date
             });
         }
-        result = bids.length ? await TransfersDAO.insertBidsBulk(bids) : 'no bids to insert';
+        result = bids.length ? await TransfersDAO.insertBidsByDate(bids,date_moment) : 'no bids to insert';
         console.log('bids insert status: ',result);
         client.close();
     } catch (e) {
-        console.error('=====Error:', e.toString());
-        console.error('=====Error stack:', e.stack);
+        console.error('\x1b[31m =====Error:', e.toString());
+        console.error('\x1b[31m =====Error stack:', e.stack);
         client.close()
         process.exit(1)
     }

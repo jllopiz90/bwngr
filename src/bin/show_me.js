@@ -72,8 +72,10 @@ async function getRounds(){
 }
 
 async function getTransactions() {
+    console.log('\x1b[47m \x1b[34m');
     console.time("startTrans");
     console.timeLog("startTrans", "Starting fetching data …");
+    console.log('\x1b[0m')
     const has = Object.prototype.hasOwnProperty;
     try {
         const handleLeage = new GetLeagueData(league);
@@ -83,8 +85,7 @@ async function getTransactions() {
         let counter = 1;
         let filtered =  resp.message;//.filter( x => moment.unix(x.date).format('MM-DD-YYYY') === moment('2019-07-19').format('MM-DD-YYYY'));
         // console.log(filtered)
-        console.log('should has bids:' , filtered[1].content[0])
-        console.log('\x1b[34m','has bids',has.call(filtered[1].content[0],'bids'), '\x1b[0m')
+        
         for(let i =0; i < filtered.length; i++){
             for(let j = 0; j < filtered[i].content.length; j++) {
                 const result = await getPlayer(filtered[i].content[j].player);
@@ -94,8 +95,8 @@ async function getTransactions() {
                 const moveTo = has.call(filtered[i].content[j],'to') ? filtered[i].content[j].to : 'market';
                 const amount = filtered[i].content[j].amount;
                 const [{price}] = await PlayersDAO.getPlayerCurrentPrice({id_bwngr: parseInt(filtered[i].content[j].player)}, {projection: {_id: 0, price: 1}});
-                console.log('price:',price)
-                console.log('\x1b[34m','has bids',has.call(filtered[i].content[j],'bids'), '\x1b[0m')
+                console.log(`\x1b[32m price: ${price} \x1b[0m`)
+                console.log('has bids',has.call(filtered[i].content[j],'bids'))
                 console.log(`deal ${counter}: `,{
                     type: type,
                     player: player ,
@@ -114,13 +115,17 @@ async function getTransactions() {
                 counter ++;
             }
         }
-        client.close();
-        console.timeEnd("startTrans",  'Client closed.');
+        if(client) client.close();
+        console.log('\x1b[47m \x1b[34m');
+        console.timeEnd("startTrans");
+        console.log('\x1b[0m');
     } catch (e) {
         console.log('\x1b[31m',`A problem ocurred while getting transactions.Error--  ${String(e)}`);
         console.log('\x1b[31m',`=====Error stack: ${String(e.stack)}`, '\x1b[0m');
-        client.close();
-        console.timeEnd("startTrans",  'Client closed.');
+        if(client) client.close();
+        console.log('\x1b[47m \x1b[34m');
+        console.timeEnd("startTrans");
+        console.log('\x1b[0m');
         process.exit(1)
     }
     
@@ -168,8 +173,8 @@ const auxFunc = async () => {
     console.log(player)
 }
 
-playWithDates();
-// getTransactions();
+// playWithDates();
+getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
