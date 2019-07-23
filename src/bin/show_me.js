@@ -157,11 +157,13 @@ function playWithDates(){
     const currentYear = moment().year();
     const initDate = `07-20-${currentYear}`;
     const date1 = moment('2019-05-18');
-    const date2 = moment(1563685607*1000);
+    const date2 = moment(1563595200*1000);
     const date3 = moment.unix(1563593436,'MM-DD-YYYY')
+    console.log(`date1 in unixtime: ${date1.unix()}`)
     console.log(`init date: ${initDate}`)
-    console.log(date1)
-    console.log(date2.format('MM-DD-YYYY'))
+    console.log('initDate > date1:', initDate > date1.format('MM-DD-YYYY'))
+    console.log('initDate > date2:', initDate > date2.format('MM-DD-YYYY'))
+    console.log('date 2 formatted:', date2.format('MM-DD-YYYY'))
     console.log(date3.format('MM-DD-YYYY'))
     console.log('date 2 equals to date 3?==>',date2.format('MM-DD-YYYY') === date3.format('MM-DD-YYYY')) // returns true at the moment because it was at the same day
     console.log(date1.isSame(date2, 'day'))
@@ -173,8 +175,8 @@ const auxFunc = async () => {
     console.log(player)
 }
 
-// playWithDates();
-getTransactions();
+playWithDates();
+// getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();

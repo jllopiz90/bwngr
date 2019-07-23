@@ -7,8 +7,8 @@ import PlayersDAO from '../dao/playersDAO';
 import TransfersDAO from '../dao/transfersDAO';
 import { MongoClient } from "mongodb";
 
-let [league,date = false] = process.argv.slice(2);
-const date_moment = date ? moment(date).format('MM-DD-YYYY') : moment().format('MM-DD-YYYY');
+let [arg1, arg2 = false] = process.argv.slice(2);
+let date_moment = arg2 ? moment(arg2).format('MM-DD-YYYY') : moment().format('MM-DD-YYYY');
 const dbs = {
     'test': process.env.BWNGR_DB_TEST,
     'liga': process.env.BWNGR_DB,
@@ -19,10 +19,9 @@ const mapTransactionsName = {
     'market': 'purchase',
     'loan' : 'loan'
 };
-
 const has = Object.prototype.hasOwnProperty;
 
-const getFormattedDeals = async deals => {
+async function getFormattedDeals(deals) {
     const formattedDeals = []; 
     const bids = [];
     for(let i = 0; i < deals.length; i++) {
@@ -36,6 +35,7 @@ const getFormattedDeals = async deals => {
                 moveFrom: from,
                 moveTo: to, 
                 amount: deals[i].content[j].amount,
+                unix_time: deals[i].date,
                 date
             });
             if( has.call(deals[i].content[j],'bids') ) { 
@@ -53,9 +53,14 @@ const getFormattedDeals = async deals => {
         }
     }
     return [formattedDeals, bids];
-} 
+}
 
-const  getTransfers = async league => {
+async function updateManagersAndPlayers(formattedDeals) {
+    const sales = formattedDeals.filter( deal => deal.type === 'sale');
+    const purchases = formattedDeals.filter( deal => deal.type === 'purchase');
+}
+
+async function getTransfers(league) {
     if(!league) league = 'liga'
     const handleLeage = new GetLeagueData(league);
     const {message: deals} = await handleLeage.getTransactions(0,20);
@@ -94,12 +99,13 @@ const  getTransfers = async league => {
     }
 }
 
-if(!league){
+if(arg1 && !has.call(dbs,arg1)){
     console.log('missing params using la liga by default');
+    date_moment = moment(arg1).format('MM-DD-YYYY'); 
     console.log('date is', date_moment);
     getTransfers();
 } else {
-    console.log('using liga: ', league);
+    console.log('using liga: ', arg1);
     console.log('date is', date_moment);
-    getTransfers(league);
+    getTransfers(arg1);
 }

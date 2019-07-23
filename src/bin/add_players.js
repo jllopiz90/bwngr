@@ -18,7 +18,7 @@ const getPlayers = async (league = 'liga')=> {
     const handleLeage = new GetLeagueData(league);
     const { message: data} = await handleLeage.getPlayers();
     const currentYear = moment().year();
-    const initDate = league === 'test' ? `07-16-${currentYear}` : `07-20-${currentYear}`;
+    const initDate = league === 'test' ? `${currentYear}-07-16` : `${currentYear}-07-20`;
     const dataArray = Object.values(data).map( player => ({
             id_bwngr:  player.id,
             name: player.name,
@@ -28,7 +28,7 @@ const getPlayers = async (league = 'liga')=> {
             price: player.price,
             price_increment: player.priceIncrement,
             owner: 'market',
-            own_since: initDate
+            own_since: moment(initDate).unix()
     }));
     MongoClient.connect(
         process.env.BWNGR_DB_URI,
