@@ -1,6 +1,4 @@
 'use strict';
-require("dotenv").config();
-import 'core-js/stable';
 import getManagers from '../modules/managers';
 
 const [league] = process.argv.slice(2);
