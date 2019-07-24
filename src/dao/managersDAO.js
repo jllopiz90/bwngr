@@ -1,3 +1,4 @@
+import { colors } from '../utils/utils';
 let managers;
 
 export default class ManagersDAO {
@@ -24,8 +25,8 @@ export default class ManagersDAO {
         message: await managers.find(filter, projection)
       }
     } catch (e) {
-      console.error(`\x1b[31m Unable to get manager.--Error: ${String(e)}`); 
-      console.error(`--Error Stack: ${String(e.stack)} \x1b[0m`); 
+      console.error(`${colors.red} Unable to get manager.--Error: ${String(e)}`); 
+      console.error(`Error Stack: ${String(e.stack)} ${colors.reset}`); 
       return {
         success: false,
         message: 'Unable to get manager'
@@ -44,10 +45,10 @@ export default class ManagersDAO {
       result = result.result;
       return {success : result.ok === 1 && result.n === 1 , message: 'Manager added sucesfully.'};
     } catch (e) {
+      console.error(`${colors.red} Error ocurred while inserting a manager.-- ${e} ${colors.reset}`);
       if(String(e).startsWith("MongoError: E11000 duplicate key error")) {
-        return { error: "A manager with the given name already exists." };
+        return { success: false, message: "A manager with the given name already exists." };
       }
-      console.error(`Error ocurred while inserting a manager.-- ${e}`);
       return {success: false, message: String(e)};
     }
   }
@@ -66,7 +67,7 @@ export default class ManagersDAO {
             return { error: `Deletion unsuccessful` };
           }
     } catch(e) {
-        console.error(`Error ocurred while insedeletingrting a manager.-- ${e}`);
+        console.log(`${colors.reset} Error ocurred while insedeletingrting a manager.-- ${e}`);
         return {success: false, message: String(e)}; 
     }   
   }
@@ -84,7 +85,7 @@ export default class ManagersDAO {
       console.log(result)
       return {success: result.insertedCount === managersInfo.length}
     }catch(e) {
-      console.error(`Error ocurred while inserting in bulk.-- ${e}`);
+      console.log(`${colors.red} Error ocurred while inserting in bulk.-- ${e}`);
       return {success: false, message: String(e)}; 
     }
   }
@@ -123,6 +124,24 @@ export default class ManagersDAO {
       return {success: false, message: String(e)};
     }
   }
+
+  static async modifyBalance(amount, id_bwngr) {
+    try {
+      const { result } =  await managers.updateOne(
+        {id_bwngr: parseInt(id_bwngr)},
+        {
+          $inc: { balance: amount }
+        }
+      );
+      return {
+        success: result.nModified === 1 && result.ok === 1
+      };
+    } catch (e) {
+      console.log(` Unable to modify balance for player with id_bwngr ${id_bwngr}.Error-- ${String(e)}`);
+      return {success: false, message: String(e)};
+    }
+  }
+
 }
 
 /**

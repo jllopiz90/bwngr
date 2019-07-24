@@ -4,6 +4,7 @@ import 'core-js/stable';
 import GetLeagueData from '../requests/getLeagueData';
 import ManagersDAO from '../dao/managersDAO';
 import { MongoClient } from "mongodb";
+import { colors } from '../utils/utils';
 
 const dbs = {
     'test': process.env.BWNGR_DB_TEST,
@@ -25,11 +26,8 @@ export default async function getManagers(league = 'liga') {
         console.log(result);
         client.close();
     } catch (e) {
-        console.log(`An error has happened ${String(e)}`);
-        console.error('\x1b[31m =====Error:', err.toString());
-        console.error('\x1b[31m =====Error stack:', err.stack);
         if (client) client.close();
-        process.exit(1);
+        handleError(e);
     }
 }
 
@@ -41,23 +39,23 @@ export async function setBalance({ amount = '', id_bwngr = '', league = 'liga' }
         let result;
         const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);
-        console.log('amount:', amount);
-        console.log('id:', id_bwngr);
         if (id_bwngr === '') {
-            console.log('setting all managers')
             result = await ManagersDAO.setBalanceAllPlayers(amount);
         } else {
-            console.log('setting 1 managers')
             result = await ManagersDAO.setBalancePlayer({ amount: amount, id_bwngr: id_bwngr })
         }
         console.log(result);
         client.close()
     } catch (e) {
-        console.error('\x1b[31m =====Error:', e.toString());
-        console.error('\x1b[31m =====Error stack:', e.stack);
         if (client) {
             client.close();
         }
-        process.exit(1)
+        handleError(e);
     }
+}
+
+function handleError(e) {
+    console.error(`${colors.reset} ${colors.red} =====Error:`, e.toString());
+    console.error(`=====Error stack: `, e.stack , colors.reset);
+    process.exit(1)
 }
