@@ -5,6 +5,8 @@ import moment from 'moment';
 import { MongoClient } from 'mongodb';
 import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
+import { getUniqueValues, groupingBy } from '../utils/utils';
+import { has } from '../utils/objectCallers';
 
 let [league] = process.argv.slice(2);
 const dbs = {
@@ -76,7 +78,6 @@ async function getTransactions() {
     console.time("startTrans");
     console.timeLog("startTrans", "Starting fetching data …");
     console.log('\x1b[0m')
-    const has = Object.prototype.hasOwnProperty;
     try {
         const handleLeage = new GetLeagueData(league);
         const resp = await handleLeage.getTransactions(0,50);
@@ -157,7 +158,7 @@ function playWithDates(){
     const currentYear = moment().year();
     const initDate = `07-20-${currentYear}`;
     const date1 = moment('2019-05-18');
-    const date2 = moment(1563595200*1000);
+    const date2 = moment(1563858333*1000);
     const date3 = moment.unix(1563593436,'MM-DD-YYYY')
     console.log(`date1 in unixtime: ${date1.unix()}`)
     console.log(`init date: ${initDate}`)
@@ -170,13 +171,28 @@ function playWithDates(){
     console.log(date1.isSame(date3,'day'))
 }
 
-const auxFunc = async () => {
-    const player = await getPlayer(9685);
-    console.log(player)
+const groupByPlayer = (groupKeys, currentRow) =>{ 
+    return groupingBy('player','value',groupKeys, currentRow)
+};
+
+const testGrouping = () => {
+    const sample = [
+        {player: 1, value: 20},
+        {player: 3, value: 25},
+        {player: 2, value: 15},
+        {player: 2, value: 10},
+        {player: 3, value: 5},
+        {player: 1, value: 50}
+    ];
+    const keys = getUniqueValues(sample.map(player => player.player));
+    console.log('unique players values: ', keys);
+    const groupResult = sample.reduce(groupByPlayer, {})
+    console.log('groupResult: ',groupResult);
 }
 
-playWithDates();
-// getTransactions();
+// testGrouping();
+// playWithDates();
+getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();

@@ -16,6 +16,7 @@ if(args.length > 2) {
     } else {
         console.log('missing params, setting balance for all users');
         const [league,amount] = args;
+        console.log('using league: ',league);
         setBalance({amount,id_bwngr: '', league});    
     }
 } else if(args.length === 1) {
