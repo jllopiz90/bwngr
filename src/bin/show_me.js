@@ -5,7 +5,7 @@ import moment from 'moment';
 import { MongoClient } from 'mongodb';
 import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
-import { getUniqueValues, groupingBy } from '../utils/utils';
+import { getUniqueValues, groupingBy, isInt } from '../utils/utils';
 import { has } from '../utils/objectCallers';
 
 let [league] = process.argv.slice(2);
@@ -190,10 +190,15 @@ const testGrouping = () => {
     console.log('groupResult: ',groupResult);
 }
 
+const auxFunc = () => {
+    console.log('\'7\' is int:', isInt('7'));
+    console.log('a is int:', isInt('a'));
+}
+
 // testGrouping();
 // playWithDates();
-getTransactions();
-// auxFunc();
+// getTransactions();
+auxFunc();
 // testPlayersDAO();
 // getPlayers();
 // getManagers();

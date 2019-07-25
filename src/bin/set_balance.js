@@ -1,8 +1,9 @@
 'use strict';
 import { setBalance } from '../modules/managers';
+import { isInt } from '../utils/utils';
 
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
-const isInt = (value) => Number.isInteger(parseInt(value));
+
 let args = process.argv.slice(2);
 
 if(args.length > 2) {

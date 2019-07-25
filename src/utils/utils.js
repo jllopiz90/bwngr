@@ -15,6 +15,10 @@ export  function formatToCurrency(number) {
     return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number);
 }
 
+export function isInt(value) {
+    return Number.isInteger(parseInt(value));
+}
+
 export const colors = {
     reset: '\x1b[0m',
 

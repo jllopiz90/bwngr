@@ -1,9 +1,9 @@
 'use strict';
 require("dotenv").config();
 import 'core-js/stable';
+import { MongoClient } from "mongodb";
 import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
-import { MongoClient } from "mongodb";
 
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
@@ -13,7 +13,6 @@ const dbs = {
     'liga': process.env.BWNGR_DB,
     'pl': process.env.BWNGR_DB_PL
 };
-const isInt = (value) => Number.isInteger(parseInt(value));
 
 const adjustPrice = async (league = 'liga') => {
     const handleLeage = new GetLeagueData(league);
