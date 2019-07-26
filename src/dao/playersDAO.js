@@ -95,10 +95,36 @@ export default class PlayersDAO {
             const result = await players.bulkWrite(updateOperations);
             return {
                 success: result.ok === 1,
-                message: 'Prices updated!'
+                message: result.ok === 1 ? 'Prices updated!' : 'Prices were not updated.'
             };
         } catch (e) {
             console.error(`Unable to increment price for player with id_bwngr ${id_bwngr}.Error-- ${String(e)}`);
+            return {success: false, message: String(e)};
+        }
+    }
+
+    static async updatePlayersOwnership(deals) {
+        try {
+            const updateOperations = [];
+            for (let i = 0; i < deals.length; i++) {
+                const deal = deals[i];
+                const [player] = await this.getPlayer({id_bwngr: deal.player}, {projection: {_id: 0, own_since: 1}});
+                if(deal.time > player.own_since) {
+                    updateOperations.push({
+                        updateOne: { 
+                            filter: { id_bwngr: deal.player }, 
+                            update: { $set: { owner: deal.new_owner, own_since: deal.time } }
+                        }
+                    });
+                }
+            }
+            const result = await players.bulkWrite(updateOperations);
+            return {
+                success: result.ok === 1,
+                message: result.ok === 1 ? 'Onwerships updated!' : 'Onwerships were not updated.'
+            };
+        } catch (e) {
+            console.error(`Unable to update ownerships.Error-- ${String(e)}`);
             return {success: false, message: String(e)};
         }
     }

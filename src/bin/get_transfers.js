@@ -12,9 +12,19 @@ if(arg1 && !has.call(dbs,arg1)){
     date_moment = moment(arg1).format('MM-DD-YYYY'); 
     console.log('date is', date_moment);
     getTransfers(date_moment);
-} else {
+} else if(arg1 && !arg2)  {
+    console.log('using liga: ', arg1);
+    date_moment = moment().format('MM-DD-YYYY'); 
+    console.log('date is', date_moment);
+    getTransfers(date_moment, arg1);
+} else if(arg1 && arg2) {
     console.log('using liga: ', arg1);
     date_moment = moment(arg2).format('MM-DD-YYYY'); 
     console.log('date is', date_moment);
     getTransfers(date_moment, arg1);
+} else {
+    console.log('missing params using la liga and today by default');
+    date_moment = moment().format('MM-DD-YYYY'); 
+    console.log('date is', date_moment);
+    getTransfers(date_moment);   
 }
