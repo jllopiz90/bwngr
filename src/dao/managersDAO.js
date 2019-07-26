@@ -14,16 +14,14 @@ export default class ManagersDAO {
     }
 
      /**
-   * Finds a manager in the `managers` collection
+   * Finds a manager in the `managers` collection (can be used to get multiple managers as well)
    * @param {string} name - The name of the desired manager
    * @returns {Object | null} Returns either a single manager or nothing
    */
   static async getManager(filter = {}, projection = {}) {
     try {
-      return {
-        success: true,
-        message: await managers.find(filter, projection)
-      }
+      const cursor = await managers.find(filter, projection);
+      return cursor ? cursor.toArray() : { success: false };
     } catch (e) {
       console.error(`${colors.red} Unable to get manager.--Error: ${String(e)}`); 
       console.error(`Error Stack: ${String(e.stack)} ${colors.reset}`); 

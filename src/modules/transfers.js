@@ -45,7 +45,7 @@ export default async function getTransfers(date_moment, league = 'liga') {
         const formattedAndFilteredDeals = formattedDeals.filter(deal => deal.type === 'purchase');
         for (let i = 0; i < formattedAndFilteredDeals.length; i++) {
             const deal = formattedAndFilteredDeals[i];
-            const [{price}] = await PlayersDAO.getPlayerCurrentPrice({id_bwngr: parseInt(deal.player)}, {projection: {_id: 0, price: 1}});
+            const [{price}] = await PlayersDAO.getPlayerCurrentPrice(parseInt(deal.player));
             bids.push({
                 player: deal.player,
                 manager: deal.moveTo,

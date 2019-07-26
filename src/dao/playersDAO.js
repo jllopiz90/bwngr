@@ -15,17 +15,17 @@ export default class PlayersDAO {
     static async getPlayer(filter = {}, projection = {}) {
         try {
             const cursor = await players.find(filter, projection);
-            return cursor ? cursor.toArray() : { found: false };
+            return cursor ? cursor.toArray() : { success: false };
         } catch (e) {
             console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
             return {success: false, message: 'Unable to get player.'};
         }
     }
 
-    static async getPlayerCurrentPrice(filter = {}, projection = {}) {
+    static async getPlayerCurrentPrice(id_bwngr) {
         try {
-            const cursor = await players.find(filter, projection);
-            return cursor ? cursor.toArray() : {found: false}
+            const cursor = await players.find({id_bwngr}, { projection: { _id: 0, price: 1 } });
+            return cursor ? cursor.toArray() : { success: false };
         } catch (e) {
             console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
             return {success: false, message: 'Unable to get player price.'};
@@ -118,7 +118,10 @@ export default class PlayersDAO {
                     });
                 }
             }
-            const result = await players.bulkWrite(updateOperations);
+            let result = {ok: -1};
+            if(updateOperations.length) {
+                result =  await players.bulkWrite(updateOperations);
+            }
             return {
                 success: result.ok === 1,
                 message: result.ok === 1 ? 'Onwerships updated!' : 'Onwerships were not updated.'

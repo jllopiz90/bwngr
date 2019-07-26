@@ -82,7 +82,7 @@ export default class User {
             };
         }
         return {
-            sucess: false
+            success: false
         };
     }
 }

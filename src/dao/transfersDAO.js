@@ -21,7 +21,7 @@ export default class TransfersDAO {
     static async getTransaction(filter, projection) {
         try {
             const cursor = await transfers.find(filter, projection);
-            return cursor ? cursor.toArray() : { found: false };
+            return cursor ? cursor.toArray() : { success: false };
         } catch (e) {
             console.log('\x1b[31m',`A problem ocurred while getting transactions.Error-- ${String(e)}`,'\x1b[0m');
             console.log('\x1b[31m',`.Error Stack-- ${String(e.stack)}`,'\x1b[0m')
@@ -32,7 +32,7 @@ export default class TransfersDAO {
     static async getBid(filter, projection) {
         try {
             const cursor = await bid.find(filter, projection);
-            return cursor ? cursor.toArray() : { found: false };
+            return cursor ? cursor.toArray() : { success: false };
         } catch (e) {
             console.log('\x1b[31m',`A problem ocurred while getting bids.Error-- ${String(e)}`,'\x1b[0m');
             console.log('\x1b[31m',`.Error Stack-- ${String(e.stack)}`,'\x1b[0m')

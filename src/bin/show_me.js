@@ -5,15 +5,12 @@ import moment from 'moment';
 import { MongoClient } from 'mongodb';
 import PlayersDAO from '../dao/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
-import { getUniqueValues, groupingBy, isInt } from '../utils/utils';
+import { getUniqueValues, groupingBy, isInt, colors } from '../utils/utils';
 import { has } from '../utils/objectCallers';
+import ManagersDAO from '../dao/managersDAO';
+import { dbs } from '../utils/common';
 
 let [league] = process.argv.slice(2);
-const dbs = {
-    'test': process.env.BWNGR_DB_TEST,
-    'liga': process.env.BWNGR_DB,
-    'pl': process.env.BWNGR_DB_PL
-};
 
 async function getLeagueInfo() {
     const handleLeage = new GetLeagueData(league);
@@ -68,6 +65,28 @@ async function getManagers() {
     console.log(data)
 }
 
+async function getManagersFromDB(leagueDefault = 'liga'){
+    try {
+        if(!client){
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, {useNewUrlParser: true})
+        }
+        const db =  client.db(dbs[leagueDefault]);
+        await ManagersDAO.injectDB(db);
+        const managers = await ManagersDAO.getManager({}, {projection: {_id: 0}});
+        managers.forEach(manager => {
+            const {name, id_bwngr, balance} = manager;
+            console.log(`${name} ----- ${id_bwngr} ----- ${balance}`)
+            // console.log(manager)
+        });
+    } catch (e) {
+        console.log(`${colors.red} Error: ${String(e)}`)
+        console.log(`Error Stack: ${String(e.stack)} ${colors.reset}`)
+    }
+    if(client){
+        client.close()
+    }
+}
+
 async function getRounds() {
     const { data: { season } } = await getLeagueInfo();
     console.log(season);
@@ -90,12 +109,12 @@ async function getTransactions() {
         for (let i = 0; i < filtered.length; i++) {
             for (let j = 0; j < filtered[i].content.length; j++) {
                 const result = await getPlayer(filtered[i].content[j].player);
-                const player = has.call(result, 'found') && !result.found ? 'player is not in the league' : result[0].name;
+                const player = has.call(result, 'success') && !result.success ? 'player is not in the league' : result[0].name;
                 const type = filtered[i].type;
                 const moveFrom = has.call(filtered[i].content[j], 'from') ? filtered[i].content[j].from : 'market';
                 const moveTo = has.call(filtered[i].content[j], 'to') ? filtered[i].content[j].to : 'market';
                 const amount = filtered[i].content[j].amount;
-                const [{ price }] = await PlayersDAO.getPlayerCurrentPrice({ id_bwngr: parseInt(filtered[i].content[j].player) }, { projection: { _id: 0, price: 1 } });
+                const [{price}] = await PlayersDAO.getPlayerCurrentPrice(parseInt(filtered[i].content[j].player));
                 console.log(`\x1b[32m price: ${price} \x1b[0m`)
                 console.log('has bids', has.call(filtered[i].content[j], 'bids'))
                 console.log(`deal ${counter}: `, {
@@ -134,7 +153,7 @@ async function getTransactions() {
 
 async function testPlayersDAO() {
     try {
-        MongoClient.connect(
+        client = MongoClient.connect(
             process.env.BWNGR_DB_URI,
             { useNewUrlParser: true }
         );
@@ -198,11 +217,12 @@ const auxFunc = () => {
 
 // testGrouping();
 // playWithDates();
-// getTransactions();
-auxFunc();
+getTransactions();
+// auxFunc();
 // testPlayersDAO();
 // getPlayers();
 // getManagers();
+// getManagersFromDB(league);
 // getTeams();
 // getLeagueInfo();
 // getRounds();
