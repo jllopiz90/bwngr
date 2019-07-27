@@ -215,9 +215,16 @@ const auxFunc = () => {
     console.log(1563505304 > 1563249600);
 }
 
+const show_me_stuff = async () => {
+    const handleLeage = new GetLeagueData(league);
+    const { message: data } = await handleLeage.getRecentRounds(0,20);
+    console.log('rounds: ',data)
+}
+
+show_me_stuff();
 // testGrouping();
 // playWithDates();
-getTransactions();
+// getTransactions();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
@@ -226,6 +233,7 @@ getTransactions();
 // getTeams();
 // getLeagueInfo();
 // getRounds();
+
 
 // const fs = require('fs')
 // const Token = require('../includes/auth/token')

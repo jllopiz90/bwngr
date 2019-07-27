@@ -122,4 +122,22 @@ export default class GetLeageData {
             console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
         }
     }
+
+    async getRecentRounds(offSet = 0, limit = 1) {
+        try {
+            const uri = 'league/board';
+            const { data: {data} } = await this.client.get(uri,{
+                params: {
+                    type: 'roundFinished',
+                    offset: offSet,
+                    limit: limit
+                }
+            });
+            return {
+                success: true, message: data
+            };
+        } catch(e) {
+            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
+        }
+    }
 }
