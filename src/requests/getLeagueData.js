@@ -61,17 +61,16 @@ export default class GetLeageData {
     async getTeams(){
         try {
             const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
-            const   { data: {data: {teams}} }   = this.client.get(uri,{
+            return this.client.get(uri,{
                 params: {
                     lang: 'en',
                     score: '1'
                 }
             });
-            return {success: true, message: teams};
         } catch(e) {
             console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
         }
-        return {success: false, message: 'Error fetching data.'};
+        return false;
     }
 
     async getTransactions(offSet,limit) {

@@ -47,7 +47,7 @@ async function getPlayer(id) {
 
 async function getTeams() {
     const handleLeage = new GetLeagueData(league);
-    const { message: data } = await handleLeage.getTeams();
+    const { data } = await handleLeage.getTeams();
     console.log(data)
     // const dataArray = Object.values(data);
     // console.log(dataArray.length);

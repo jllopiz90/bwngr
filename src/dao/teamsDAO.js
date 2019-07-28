@@ -51,16 +51,10 @@ export default class TeamsDAO{
                 return {insertOne: {'document': elem}};
             });
             const result = await teams.bulkWrite(insertOperations);
-            return {
-                success: result.insertedCount === teamsInfo.length,
-                message: 'Teams addded.'
-            }
+            return result.insertedCount === teamsInfo.length;
         } catch (e) {
-            console.error(`Unable to insert teams in bulk.Error-- ${String(e)}`);
-            return {
-                success: false,
-                message: 'Unable to insert teams in bulk.'
-            }
+            console.log(`Unable to insert teams in bulk.Error-- ${String(e)}`);
+            return false;
         }   
     }
 }
