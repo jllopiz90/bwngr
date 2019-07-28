@@ -23,8 +23,8 @@ export default class PlayersDAO {
 
     static async getPlayerCurrentPrice(id_bwngr) {
         try {
-            const cursor = await players.find({id_bwngr}, { projection: { _id: 0, price: 1 } });
-            return cursor ? cursor.toArray() : { success: false };
+            const cursor = players.find({id_bwngr}, { projection: { _id: 0, price: 1 } });
+            return cursor.toArray();
         } catch (e) {
             console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
             return {success: false, message: 'Unable to get player price.'};

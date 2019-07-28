@@ -5,6 +5,7 @@ import GetLeagueData from '../requests/getLeagueData';
 import ManagersDAO from '../dao/managersDAO';
 import { MongoClient } from "mongodb";
 import { colors } from '../utils/utils';
+import { handleError } from '../utils/common';
 
 const dbs = {
     'test': process.env.BWNGR_DB_TEST,
@@ -13,7 +14,7 @@ const dbs = {
 };
 let client;
 
-export default async function getManagers(league = 'liga') {
+export default async function initManagers(league = 'liga') {
     try {
         const handleLeage = new GetLeagueData(league);
         const promiseGetManagers = handleLeage.getManagers();
@@ -23,12 +24,13 @@ export default async function getManagers(league = 'liga') {
         const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);
         const   { data: { data: { standings } } } = await promiseGetManagers;
-        const result = await ManagersDAO.insertManagersBulk(standings.map(elem => ({ name: elem.name, id_bwngr: elem.id })));
+        const result = await ManagersDAO.insertManagersBulk(standings.map(elem => ({ name: elem.name, id_bwngr: elem.id, balance: 40000000 })));
         console.log(result);
         client.close();
     } catch (e) {
+        console.log(`${colors.red}Error ocurred while inserting managers.-- ${String(e)}`);
         if (client) client.close();
-        handleError(e);
+        handleError(e,'Unable to init managers');
     }
 }
 
@@ -51,12 +53,6 @@ export async function setBalance({ amount = '', id_bwngr = '', league = 'liga' }
         if (client) {
             client.close();
         }
-        handleError(e);
+        handleError(e,'Unable to set manager balance');
     }
-}
-
-function handleError(e) {
-    console.error(`${colors.reset} ${colors.red} =====Error:`, e.toString());
-    console.error(`=====Error stack: `, e.stack , colors.reset);
-    process.exit(1)
 }

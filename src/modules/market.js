@@ -5,7 +5,7 @@ import PlayersDAO from '../dao/playersDAO';
 import ManagersDAO from '../dao/managersDAO';
 import { MongoClient } from 'mongodb';
 import { formatToCurrency } from '../utils/utils';
-import { dbs } from '../utils/common';
+import { dbs, handleError } from '../utils/common';
 import { colors } from '../utils/utils';
 require("dotenv").config();
 
@@ -41,8 +41,7 @@ export async function getMarket(league = 'liga') {
             client.close();
         }
     } catch (e) {
-        console.log(`${colors.red} A problem ocurred while displaying current market.Error-- ${String(e)}`);
-        console.log(`.Error Stack-- ${String(e.stack)} ${colors.reset}`);
+        handleError(e);
     }
 }
 

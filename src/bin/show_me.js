@@ -14,8 +14,8 @@ let [league] = process.argv.slice(2);
 
 async function getLeagueInfo() {
     const handleLeage = new GetLeagueData(league);
-    const { message: data } = await handleLeage.getLeagueInfo();
-    // console.log(data)
+    const { data } = await handleLeage.getLeagueInfo();
+    console.log(data)
     return data;
 }
 
@@ -46,9 +46,13 @@ async function getPlayer(id) {
 }
 
 async function getTeams() {
-    const handleLeage = new GetLeagueData(league);
-    const { data } = await handleLeage.getTeams();
-    console.log(data)
+    try{
+        const handleLeage = new GetLeagueData(league);
+        const { data } = await handleLeage.getTeams();
+        console.log(data)
+    }catch{
+        console.error(`Error ocurred while getting teams from bwnger.--${String(e)}`);
+    }
     // const dataArray = Object.values(data);
     // console.log(dataArray.length);
     // console.log(dataArray[0]);
@@ -56,9 +60,13 @@ async function getTeams() {
 }
 
 async function getManagers() {
-    const handleLeage = new GetLeagueData(league);
-    const { message: data } = await handleLeage.getManagers();
-    console.log(data)
+    try {
+        const handleLeage = new GetLeagueData(league);
+        const   { data: { data: { standings } } } = await handleLeage.getManagers();
+        console.log(standings)   
+    } catch (e) {
+        console.log(`${colors.red}Error ocurred while getting users from bwnger.-- ${String(e)}`);
+    }
 }
 
 async function getManagersFromDB(leagueDefault = 'liga'){
@@ -95,11 +103,11 @@ async function getTransactions() {
     console.log('\x1b[0m')
     try {
         const handleLeage = new GetLeagueData(league);
-        const resp = await handleLeage.getTransactions(0, 50);
+        const { data: { data } } = await handleLeage.getTransactions(0, 50);
         console.timeLog("startTrans", "data fetched");
         // console.log(resp.message[0].content)//.filter( x => x.content.length>1 && x.type === 'market').map( x => x.content)[0])//.map(x=> x.content));
         let counter = 1;
-        let filtered = resp.message;//.filter( x => moment.unix(x.date).format('MM-DD-YYYY') === moment('2019-07-19').format('MM-DD-YYYY'));
+        let filtered = data;//.filter( x => moment.unix(x.date).format('MM-DD-YYYY') === moment('2019-07-19').format('MM-DD-YYYY'));
         // console.log(filtered)
 
         for (let i = 0; i < filtered.length; i++) {
@@ -110,7 +118,8 @@ async function getTransactions() {
                 const moveFrom = has.call(filtered[i].content[j], 'from') ? filtered[i].content[j].from : 'market';
                 const moveTo = has.call(filtered[i].content[j], 'to') ? filtered[i].content[j].to : 'market';
                 const amount = filtered[i].content[j].amount;
-                const [{price}] = await PlayersDAO.getPlayerCurrentPrice(parseInt(filtered[i].content[j].player));
+                const result = await PlayersDAO.getPlayerCurrentPrice(parseInt(filtered[i].content[j].player));
+                const [{ price }] = result.length > 0 ? result : [{ price: 0 }];
                 console.log(`\x1b[32m price: ${price} \x1b[0m`)
                 console.log('has bids', has.call(filtered[i].content[j], 'bids'))
                 console.log(`deal ${counter}: `, {
@@ -120,7 +129,7 @@ async function getTransactions() {
                     moveFrom: moveFrom,
                     moveTo: moveTo,
                     amount: amount,
-                    bids: has.call(filtered[i].content[j], 'bids') ? filtered[i].content[j].bids.map(bid => ({
+                    bids: has.call(filtered[i].content[j], 'bids') && price > 0 ? filtered[i].content[j].bids.map(bid => ({
                         player: filtered[i].content[j].player,
                         manager: bid.user.id,
                         amount: bid.amount,
@@ -213,14 +222,19 @@ const auxFunc = () => {
 }
 
 const show_me_stuff = async () => {
-    const handleLeage = new GetLeagueData(league);
-    const { message: data } = await handleLeage.getRecentRounds(0,20);
-    console.log('rounds: ',data)
+    try {
+        const handleLeage = new GetLeagueData(league);
+        const { data: {data} } = await handleLeage.getRecentRounds(0,20);
+        console.log('rounds: ',data)    
+    } catch (error) {
+        console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
+    }
+    
 }
 
-// show_me_stuff();
+show_me_stuff();
 // testGrouping();
-playWithDates();
+// playWithDates();
 // getTransactions();
 // auxFunc();
 // testPlayersDAO();

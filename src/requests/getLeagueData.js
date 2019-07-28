@@ -15,7 +15,7 @@ const users = {
 };
 
 export default class GetLeageData {
-    constructor(league='liga') {
+    constructor(league = 'liga') {
         const leagueHeader = leagues[league];
         const userHeader = users[league];
         this.league = league;
@@ -34,22 +34,17 @@ export default class GetLeageData {
         });
     }
 
-    async getManagers(){
-        try {
-            return this.client.get('/league',{
-                params: {
-                    fields: 'standings'
-                }
-            });
-        } catch(e) {
-            console.log(`${colors.red}Error ocurred while getting users from bwnger.-- ${String(e)}`);
-        }
-        return {success: false, message: 'Error fetching data.'};
+    async getManagers() {
+        return this.client.get('/league', {
+            params: {
+                fields: 'standings'
+            }
+        });
     }
 
-    async getPlayers(){
+    async getPlayers() {
         const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
-        const players = this.client.get(uri,{
+        const players = this.client.get(uri, {
             params: {
                 lang: 'en',
                 score: '1'
@@ -58,38 +53,25 @@ export default class GetLeageData {
         return players;
     }
 
-    async getTeams(){
-        try {
-            const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
-            return this.client.get(uri,{
-                params: {
-                    lang: 'en',
-                    score: '1'
-                }
-            });
-        } catch(e) {
-            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
-        }
-        return false;
+    async getTeams() {
+        const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
+        return this.client.get(uri, {
+            params: {
+                lang: 'en',
+                score: '1'
+            }
+        });
     }
 
-    async getTransactions(offSet,limit) {
-        try {
-            const uri = 'league/board';
-            const { data: {data}} = this.client.get(uri,{
-                params: {
-                    type:'transfer,market,exchange,loan,loanReturn,clauseIncrement,auctions',
-                    offset: offSet,
-                    limit: limit
-                }
-            });
-            return {
-                success: true, message: data
-            };
-        } catch (e) {
-            console.error(`Error ocurred while getting transactions.Error--${String(e)}`)
-        }
-        return {success: false, message: 'Error fetching data.'};
+    async getTransactions(offSet, limit) {
+        const uri = 'league/board';
+        return this.client.get(uri, {
+            params: {
+                type: 'transfer,market,exchange,loan,loanReturn,clauseIncrement,auctions',
+                offset: offSet,
+                limit: limit
+            }
+        });
     }
 
     async getCurrentMarket() {
@@ -102,38 +84,24 @@ export default class GetLeageData {
         return false;
     }
 
-    async getLeagueInfo(){
-        try {
-            const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
-            const   { data }   = this.client.get(uri,{
-                params: {
-                    lang: 'en',
-                    score: '1'
-                }
-            });
-            return {success: true, message: data};
-        } catch(e) {
-            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
-        }
-        return {success: false, message: 'Error fetching data.'};
+    async getLeagueInfo() {
+        const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
+        return this.client.get(uri, {
+            params: {
+                lang: 'en',
+                score: '1'
+            }
+        });
     }
 
     async getRecentRounds(offSet = 0, limit = 1) {
-        try {
-            const uri = 'league/board';
-            const { data: {data} } = this.client.get(uri,{
-                params: {
-                    type: 'roundFinished',
-                    offset: offSet,
-                    limit: limit
-                }
-            });
-            return {
-                success: true, message: data
-            };
-        } catch(e) {
-            console.error(`Error ocurred while getting league info from bwnger.--${String(e)}`);
-        }
-        return {success: false, message: 'Error fetching data.'};
+        const uri = 'league/board';
+        return this.client.get(uri, {
+            params: {
+                type: 'roundFinished',
+                offset: offSet,
+                limit: limit
+            }
+        });
     }
 }

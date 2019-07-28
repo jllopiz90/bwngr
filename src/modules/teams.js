@@ -3,7 +3,7 @@ import 'core-js/stable';
 import GetLeagueData from '../requests/getLeagueData';
 import TeamsDAO from '../dao/teamsDAO';
 import { MongoClient } from "mongodb";
-import { dbs } from '../utils/common';
+import { dbs, handleError } from '../utils/common';
 
 export async function insertTeams(league = 'liga') {
     let promiseClient;
@@ -20,10 +20,9 @@ export async function insertTeams(league = 'liga') {
         await TeamsDAO.injectDB(db);
         const result = await TeamsDAO.insertTeamsBulk(dataArray);
         console.log(result);
-        client.close()
+        client.close();
     } catch (err) {
-        console.error('=====Error:', String(err));
-        console.error('=====Error stack:', err.stack);
+        handleError(err);
         const client = promiseClient && await promiseClient;
         client && client.close;
     }

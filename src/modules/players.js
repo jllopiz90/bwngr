@@ -5,7 +5,7 @@ import moment from 'moment';
 import GetLeagueData from '../requests/getLeagueData';
 import PlayersDAO from '../dao/playersDAO';
 import { MongoClient } from "mongodb";
-import { dbs } from '../utils/common';
+import { dbs, handleError } from '../utils/common';
 
 const playerPositions = ['gk','df','mf','st']; 
 
@@ -36,8 +36,7 @@ export default async function initPlayers(league = 'liga'){
         await PlayersDAO.insertPlayersBulk(dataArray) 
         clientResolved.close();
     } catch (err) {
-        console.error('\x1b[31m =====Error:', String(err));
-        console.error('\x1b[31m =====Error stack:', err.stack, '\x1b[0m');
+        handleError(err)
     }
 }
 
@@ -62,8 +61,6 @@ export async function adjustPrice(league = 'liga'){
     } catch (err) {
         const client = promiseClient && await promiseClient;
         client && client.close();
-        console.log('\x1b[31m =====Error:', err.toString());
-        console.log('\x1b[31m =====Error stack:', err.stack,'\x1b[0m');
+        handleError(err);
     }
-    
 }
