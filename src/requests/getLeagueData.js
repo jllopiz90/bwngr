@@ -97,18 +97,11 @@ export default class GetLeageData {
     async getCurrentMarket() {
         try {
             const uri = 'market';
-            const { data: {data: {sales}}} = this.client.get(uri);
-            const salesFormatted = sales.map( sale => ({
-                player: sale.player.id,
-                price: sale.price
-            }));
-            return {
-                success: true, message: salesFormatted
-            };
+            return this.client.get(uri);
         } catch (e) {
-            console.error(`Error ocurred while getting transactions.Error--${String(e)}`)
+            console.error(`Error ocurred while getting market.Error--${String(e)}`)
         }
-        return {success: false, message: 'Error fetching data.'};
+        return false;
     }
 
     async getLeagueInfo(){
