@@ -29,10 +29,7 @@ let client;
 async function getPlayer(id) {
     try {
         if (!client) {
-            client = await MongoClient.connect(
-                process.env.BWNGR_DB_URI,
-                { poolSize: 100, useNewUrlParser: true }
-            );
+            client = await MongoClient.connect( process.env.BWNGR_DB_URI, { poolSize: 100, useNewUrlParser: true });
         }
         const db = league !== 'undefined' && league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
         if (!league) {
@@ -44,9 +41,8 @@ async function getPlayer(id) {
     } catch (e) {
         console.error('=====Error:', e.toString());
         console.error('=====Error stack:', e.stack);
-        client.close();
-        process.exit(1)
     }
+    return false;
 }
 
 async function getTeams() {
@@ -109,7 +105,7 @@ async function getTransactions() {
         for (let i = 0; i < filtered.length; i++) {
             for (let j = 0; j < filtered[i].content.length; j++) {
                 const result = await getPlayer(filtered[i].content[j].player);
-                const player = has.call(result, 'success') && !result.success ? 'player is not in the league' : result[0].name;
+                const player = !result ? 'player is not in the league' : result[0].name;
                 const type = filtered[i].type;
                 const moveFrom = has.call(filtered[i].content[j], 'from') ? filtered[i].content[j].from : 'market';
                 const moveTo = has.call(filtered[i].content[j], 'to') ? filtered[i].content[j].to : 'market';
@@ -179,6 +175,7 @@ function playWithDates() {
     const date1 = moment('2019-05-18');
     const date2 = moment(1563858333 * 1000);
     const date3 = moment.unix(1563593436, 'MM-DD-YYYY')
+    console.log(`today: ${moment().format("YYYY-MM-DD")}`)
     console.log(`date1 in unixtime: ${date1.unix()}`)
     console.log(`init date: ${initDate}`)
     console.log('initDate > date1:', initDate > date1.format('MM-DD-YYYY'))
@@ -221,9 +218,9 @@ const show_me_stuff = async () => {
     console.log('rounds: ',data)
 }
 
-show_me_stuff();
+// show_me_stuff();
 // testGrouping();
-// playWithDates();
+playWithDates();
 // getTransactions();
 // auxFunc();
 // testPlayersDAO();

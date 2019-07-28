@@ -1,4 +1,3 @@
-'use strict';
 import getManagers from '../modules/managers';
 
 const [league] = process.argv.slice(2);

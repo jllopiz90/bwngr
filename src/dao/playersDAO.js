@@ -1,4 +1,3 @@
-'use strict';
 let players;
 
 export default class PlayersDAO {
@@ -14,8 +13,8 @@ export default class PlayersDAO {
 
     static async getPlayer(filter = {}, projection = {}) {
         try {
-            const cursor = await players.find(filter, projection);
-            return cursor ? cursor.toArray() : { success: false };
+            const cursor = players.find(filter, projection);
+            return cursor && cursor.toArray();
         } catch (e) {
             console.log('\x1b[31m',`Unable to get player.Erorr-- ${String(e)}`,'\x1b[0m');
             return {success: false, message: 'Unable to get player.'};
@@ -65,17 +64,17 @@ export default class PlayersDAO {
                 insertOne: { 'document': player}
             }));
             const result = insertOperations.length ? await players.bulkWrite(insertOperations) : false;
-            return {success: !insertOperations.length || result.ok === 1, message: 'New players inserted!'};   
+            return result && result.ok === 1;   
         } catch (e) {
             console.log('\x1b[31m',`Unable to bulk insert players.Error-- ${String(e)}`);
             console.log(`Erorr Stack-- ${String(e.stack)}`,'\x1b[0m');
-            return {success: false, message: 'Unable to bulk insert players'};
+            throw e;
         }
     }
 
     static async getAllIDs() {
         try {
-            const cursor = await players.find({}, {projection: {_id: 0, id_bwngr: 1}});
+            const cursor = players.find({}, {projection: {_id: 0, id_bwngr: 1}});
             return cursor ? await cursor.toArray() : [];
         } catch (e) {
             console.error('\x1b[31m',`Unable to get all ids.Error-- ${String(e)}`);
@@ -92,14 +91,11 @@ export default class PlayersDAO {
                     update: { $set: { price, price_increment } }
                 }
             }));
-            const result = await players.bulkWrite(updateOperations);
-            return {
-                success: result.ok === 1,
-                message: result.ok === 1 ? 'Prices updated!' : 'Prices were not updated.'
-            };
+            const result = updateOperations.length ? await players.bulkWrite(updateOperations) : false;
+            return result && result.ok === 1
         } catch (e) {
             console.error(`Unable to increment price for player with id_bwngr ${id_bwngr}.Error-- ${String(e)}`);
-            return {success: false, message: String(e)};
+            throw e;
         }
     }
 
