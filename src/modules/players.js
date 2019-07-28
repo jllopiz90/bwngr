@@ -33,8 +33,9 @@ export default async function initPlayers(league = 'liga'){
         clientResolved =  await promiseClient;
         const db = clientResolved.db(dbs[league]);
         await PlayersDAO.injectDB(db);
-        await PlayersDAO.insertPlayersBulk(dataArray) 
+        const result = await PlayersDAO.insertPlayersBulk(dataArray) 
         clientResolved.close();
+        console.log(result ? 'init players done' : 'a problem occured while init players');
     } catch (err) {
         handleError(err)
     }

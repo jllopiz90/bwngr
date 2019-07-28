@@ -10,7 +10,7 @@ module.exports.execute = async function (params) {
         case 'getManagers':
             if(await UserAuth.verify(token)){
                 const result = await ManagersDAO.getManager();
-                return {success: result.success, message: result.message}
+                return {success: !!result, message: result || 'An problem has happened getting managers.'}
             }
             return {success: false, message: 'Auth failed'}
         default:
