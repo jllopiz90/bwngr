@@ -7,7 +7,7 @@ import GetLeagueData from '../requests/getLeagueData';
 import PlayersDAO from '../dao/playersDAO';
 import TransfersDAO from '../dao/transfersDAO';
 import ManagersDAO from '../dao/managersDAO';
-import { groupingBy, colors } from '../utils/utils';
+import { groupingBy } from '../utils/utils';
 import { has } from '../utils/objectCallers';
 import { dbs, handleError } from '../utils/common';
 
@@ -18,21 +18,23 @@ const mapTransactionsName = {
 };
 const groupByManager = (groupKeys, currentRow) => groupingBy('manager', 'amount', groupKeys, currentRow);
 
-export default async function getTransfers(date_moment, league = 'liga') {
-    const handleLeage = new GetLeagueData(league);
-    const { data: { data } } = await handleLeage.getTransactions(0, 20);
-    let dealsFiltered = data.filter(deal => moment.unix(deal.date).format('MM-DD-YYYY') === date_moment);
+export default async function updateTransfers(date_moment, league = 'liga') {
     let client;
     try {
-        client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        const handleLeage = new GetLeagueData(league);
+        const { data: { data } } = await handleLeage.getTransactions(0, 20);
+        client = await clientPromise;
         const db = client.db(dbs[league]);
         await PlayersDAO.injectDB(db);
+        let dealsFiltered = data.filter(deal => moment.unix(deal.date).format('MM-DD-YYYY') === date_moment);
+        const dealsPromise = getFormattedDeals(dealsFiltered);
         await TransfersDAO.injectDB(db);
         await ManagersDAO.injectDB(db);
-        const [formattedDeals, bids] = await getFormattedDeals(dealsFiltered);
-        let result = formattedDeals.length ? await TransfersDAO.insertTransfersByDate(formattedDeals, date_moment) : 'no deals to insert';
-        console.log('deals insert status: ', result);
-        if (!result.success || result === 'no deals to insert') {
+        const [formattedDeals, bids] = await dealsPromise;
+        let inserTransfersResult = formattedDeals.length ? await TransfersDAO.insertTransfersByDate(formattedDeals, date_moment) : 'no deals to insert';
+        console.log('deals insert status: ', inserTransfersResult);
+        if (!inserTransfersResult || inserTransfersResult === 'no deals to insert') {
             client.close();
             return;
         }
@@ -45,12 +47,12 @@ export default async function getTransfers(date_moment, league = 'liga') {
         const formattedAndFilteredDeals = formattedDeals.filter(deal => deal.type === 'purchase');
         for (let i = 0; i < formattedAndFilteredDeals.length; i++) {
             const deal = formattedAndFilteredDeals[i];
-            const [{ price }] = await PlayersDAO.getPlayerCurrentPrice(parseInt(deal.player));
+            const price = await PlayersDAO.getPlayerCurrentPrice(parseInt(deal.player));
             bids.push({
                 player: deal.player,
                 manager: deal.moveTo,
                 amount: deal.amount,
-                overprice: deal.amount - price,
+                overprice: deal.amount - price || 0,
                 date: deal.date
             });
         }
@@ -85,8 +87,7 @@ async function getFormattedDeals(deals) {
                 date
             });
             if (has.call(deals[i].content[j], 'bids')) {
-                const result = await PlayersDAO.getPlayerCurrentPrice({ id_bwngr: parseInt(deals[i].content[j].player) }, { projection: { _id: 0, price: 1 } });
-                const [{ price }] = result.length > 0 ? result : [{ price: 0 }];
+                const price = await PlayersDAO.getPlayerCurrentPrice(parseInt(deals[i].content[j].player));
                 price > 0 && deals[i].content[j].bids.forEach(bid => {
                     bids.push({
                         player: deals[i].content[j].player,
