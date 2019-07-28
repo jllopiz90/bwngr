@@ -36,12 +36,11 @@ export default class GetLeageData {
 
     async getManagers(){
         try {
-            const   { data: { data: { standings } } } = this.client.get('/league',{
+            return this.client.get('/league',{
                 params: {
                     fields: 'standings'
                 }
             });
-            return {success: true, message: standings};
         } catch(e) {
             console.log(`${colors.red}Error ocurred while getting users from bwnger.-- ${String(e)}`);
         }

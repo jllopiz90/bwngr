@@ -16,13 +16,14 @@ let client;
 export default async function getManagers(league = 'liga') {
     try {
         const handleLeage = new GetLeagueData(league);
-        const { message: data } = await handleLeage.getManagers();
+        const promiseGetManagers = handleLeage.getManagers();
         if (!client) {
             client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
         }
         const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);
-        const result = await ManagersDAO.insertManagersBulk(data.map(elem => ({ name: elem.name, id_bwngr: elem.id })));
+        const   { data: { data: { standings } } } = await promiseGetManagers;
+        const result = await ManagersDAO.insertManagersBulk(standings.map(elem => ({ name: elem.name, id_bwngr: elem.id })));
         console.log(result);
         client.close();
     } catch (e) {
