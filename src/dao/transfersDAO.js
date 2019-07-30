@@ -30,8 +30,8 @@ export default class TransfersDAO {
 
     static async getBid(filter, projection) {
         try {
-            const cursor = await bid.find(filter, projection);
-            return cursor ? cursor.toArray() : { success: false };
+            const cursor = await bids.find(filter, projection);
+            return await cursor.toArray();
         } catch (e) {
             handleError(e, 'A problem ocurred while getting bids.');
         }

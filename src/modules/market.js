@@ -3,13 +3,19 @@ import 'core-js/stable';
 import GetLeagueData from '../requests/getLeagueData';
 import PlayersDAO from '../dao/playersDAO';
 import ManagersDAO from '../dao/managersDAO';
+import TransfersDAO from '../dao/transfersDAO';
+import TeamsDAO from '../dao/teamsDAO';
 import { MongoClient } from 'mongodb';
 import { formatToCurrency } from '../utils/utils';
 import { dbs, handleError } from '../utils/common';
-import { colors } from '../utils/utils';
+import { colors, groupingByWithCount } from '../utils/utils';
 require("dotenv").config();
 
+const maxBid = (balance, teamValue) => balance + teamValue / 4;
+const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
+
 export async function getMarket(league = 'liga') {
+    let client;
     try {
         const leagueHandler = new GetLeagueData(league);
         const promiseMarket = leagueHandler.getCurrentMarket();
@@ -17,24 +23,28 @@ export async function getMarket(league = 'liga') {
         const { data: { data: { sales } } } = promiseMarket ? await promiseMarket : {data:{data:{sales:[]}}};
         if(!sales.length){
             console.log('problem getting market from bwngr');
-            const client = await promiseClient;
-            client.close;
+            client = await promiseClient;
+            client.close();
         } else {
             const salesFormatted = sales.map(sale => ({
                 player: sale.player.id,
                 price: sale.price
             }));
-            const client = await promiseClient;
+            client = await promiseClient;
             const db =  client.db(dbs[league]);
             await PlayersDAO.injectDB(db);
+            await TeamsDAO.injectDB(db);
+            const teams = await TeamsDAO.getTeam({}, {projection: {_id:0, name: 1, id_bwngr: 1}});
             for (let i = 0; i < salesFormatted.length; i++) {
                 const sale = salesFormatted[i];
-                const result = await PlayersDAO.getPlayer({id_bwngr: sale.player}, {projection: {_id: 0, name: 1}})
+                const result = await PlayersDAO.getPlayer({id_bwngr: sale.player}, {projection: {_id: 0, name: 1, team_id: 1}});
                 if(result) {
-                    const [{name}] = result  ;
-                    console.log(`${colors.reset} player: ${name} ${colors.black} ---- ${colors.green} price: ${formatToCurrency(sale.price)} ${colors.reset}`);
+                    const [{name, team_id}] = result;
+                    const teamName = teams.filter( team => team.id_bwngr === team_id)[0]['name'];
+                    console.log(`${colors.yellow} player: ${name} ${colors.black} ---- ${colors.green} price: ${formatToCurrency(sale.price)} ${colors.reset} --- team: ${teamName}`);
+                    await getPlayerPrevBids(sale.player,db);
                 } else {
-                    console.log('player not foundm, id: ', sale.player)
+                    console.log('player not found, id: ', sale.player)
                 }
             }
             await getManagersState(db);
@@ -42,6 +52,7 @@ export async function getMarket(league = 'liga') {
         }
     } catch (e) {
         handleError(e);
+        client && client.close();
     }
 }
 
@@ -99,4 +110,17 @@ async function getManagersState(db) {
     console.log(` ${colors.reset} END ==============================================================`);
 }
 
-const maxBid = (balance, teamValue) => balance + teamValue / 4;
+export async function getPlayerPrevBids(id_bwngr, db) {
+    await TransfersDAO.injectDB(db);
+    await ManagersDAO.injectDB(db);
+    const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
+    const bids = await TransfersDAO.getBid({player: id_bwngr}, {projection: {_id:0, manager:1 , overprice: 1}});
+    const groupedByManager = bids.reduce(groupByManager,{});
+    const keysArray = Object.keys(groupedByManager);
+    keysArray.length && console.log('Previous bids for this player:');
+    keysArray.forEach(key => {
+        const managerProjection = groupedByManager[key];
+        const managerName = managers.filter(man => man.id_bwngr === parseInt(key))[0]['name']
+        console.log(`${colors.reset} manager: ${managerName} ${colors.black} ---- ${colors.green} avg bid overprice: ${formatToCurrency(managerProjection.totalCash/managerProjection.bidsAmount)} ---- total bids: ${managerProjection.bidsAmount} ${colors.reset}`)
+    })
+}

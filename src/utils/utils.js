@@ -11,6 +11,13 @@ export const groupingBy = (field, value, groupKeys, currentRow) => {
     return groupKeys;
 }
 
+export const groupingByWithCount = (field, value, groupKeys, currentRow) => {
+    groupKeys[currentRow[field]] = groupKeys.hasOwnProperty(currentRow[field]) ? 
+     {totalCash: groupKeys[currentRow[field]]['totalCash'] + parseInt(currentRow[value]), bidsAmount: groupKeys[currentRow[field]]['bidsAmount']  + 1}
+    : {totalCash: parseInt(currentRow[value]), bidsAmount: 1}
+    return groupKeys;
+}
+
 export  function formatToCurrency(number) {
     return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number);
 }

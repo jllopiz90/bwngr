@@ -1,4 +1,7 @@
 'use strict';
+
+import { handleError } from "../utils/common";
+
 let teams;
 
 export default class TeamsDAO{
@@ -13,36 +16,24 @@ export default class TeamsDAO{
         }
     }
 
-    static async getTeam(id_bwngr){
+    static async getTeam(filter, projection){
         try {
-            const team = await teams.findOne({id_bwngr:parseInt(id_bwngr)}, {projection: {_id:0, name: 1}});
-            return {
-                success: true,
-                message: team
-            }
+            const cursor = await teams.find(filter, projection);
+            return cursor.toArray();
         } catch (e) {
-            console.error(`Unable to get Team wth id ${id_bwngr}.--Error: ${String(e)}`)
-            return {
-                success: false,
-                message: String(e)
-            }
+            handleError(e,`Unable to get Team wth id ${id_bwngr}`);
         }
+        return false;
     }
 
     static async addTeam(teamInfo){
         try {
             const { result: result } = await teams.insertOne(teamInfo);
-            return {
-                success: result.ok ===1 && result.n === 1,
-                message: 'Team added'
-            }
+            return result.ok ===1 && result.n === 1;
         } catch (e) {
-            console.error(`Unable to add Team.--Error: ${String(e)}`)
-            return {
-                success: false,
-                message: 'Unable to add Team.'
-            }
+            handleError(e,'Unable to add Team.');
         }
+        return false;
     }
 
     static async insertTeamsBulk(teamsInfo) {
@@ -53,7 +44,7 @@ export default class TeamsDAO{
             const result = await teams.bulkWrite(insertOperations);
             return result.insertedCount === teamsInfo.length;
         } catch (e) {
-            console.log(`Unable to insert teams in bulk.Error-- ${String(e)}`);
+            handleError(e,'Unable to insert teams in bulk');
             return false;
         }   
     }
