@@ -1,4 +1,5 @@
 import { colors } from './utils';
+require("dotenv").config();
 
 export const dbs = {
     'test': process.env.BWNGR_DB_TEST,
