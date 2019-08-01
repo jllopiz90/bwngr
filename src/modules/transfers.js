@@ -17,6 +17,7 @@ const mapTransactionsName = {
     'loan': 'loan'
 };
 const groupByManager = (groupKeys, currentRow) => groupingBy('manager', 'amount', groupKeys, currentRow);
+const compareObj = (obj1, obj2) => Object.keys(obj1).length === Object.keys(obj2).length && Object.keys(obj1).every(key => has.call(obj2, key) && obj1[key] === obj2[key])
 
 export default async function updateTransfers(date_moment, league = 'liga') {
     let client;
@@ -24,27 +25,30 @@ export default async function updateTransfers(date_moment, league = 'liga') {
         const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
         const handleLeage = new GetLeagueData(league);
         const { data: { data } } = await handleLeage.getTransactions(0, 20);
+        console.log('players fetched form bwngr');
         client = await clientPromise;
         const db = client.db(dbs[league]);
         await PlayersDAO.injectDB(db);
-        let dealsFiltered = data.filter(deal => moment.unix(deal.date).format('MM-DD-YYYY') === date_moment);
-        const dealsPromise = getFormattedDeals(dealsFiltered);
+        let dealsFilteredByDate = data.filter(deal => moment.unix(deal.date).format('MM-DD-YYYY') === date_moment);
+        const dealsPromise = getFormattedDeals(dealsFilteredByDate);
         await TransfersDAO.injectDB(db);
         await ManagersDAO.injectDB(db);
+        const transfersFromDB = await TransfersDAO.getTransaction({date: date_moment},{projection: {_id: 0}});
         const [formattedDeals, bids] = await dealsPromise;
-        let inserTransfersResult = formattedDeals.length ? await TransfersDAO.insertTransfersByDate(formattedDeals, date_moment) : 'no deals to insert';
+        const noInDBDeals = formattedDeals.filter(deal => !transfersFromDB.some(dealFromDB => compareObj(deal,dealFromDB)));
+        let inserTransfersResult = noInDBDeals.length ? await TransfersDAO.insertTransfersByDate(noInDBDeals) : 'no deals to insert';
         console.log('deals insert status: ', inserTransfersResult);
         if (!inserTransfersResult || inserTransfersResult === 'no deals to insert') {
             client.close();
             return;
         }
         console.log('before update managers');
-        await updateManagers(formattedDeals);
+        await updateManagers(noInDBDeals);
         console.log('after update managers');
         console.log('before update players ownership');
-        await updatePlayersOwnership(formattedDeals);
+        await updatePlayersOwnership(noInDBDeals);
         console.log('after update players ownership');
-        const formattedAndFilteredDeals = formattedDeals.filter(deal => deal.type === 'purchase');
+        const formattedAndFilteredDeals = noInDBDeals.filter(deal => deal.type === 'purchase');
         for (let i = 0; i < formattedAndFilteredDeals.length; i++) {
             const deal = formattedAndFilteredDeals[i];
             const price = await PlayersDAO.getPlayerCurrentPrice(parseInt(deal.player));
@@ -64,7 +68,7 @@ export default async function updateTransfers(date_moment, league = 'liga') {
         return { success: true, message: 'All done!' };
     } catch (e) {
         handleError(e, 'Unable to update transfers');
-        client.close();
+        client && client.close();
         return { success: false, message: 'Something went wrong pal :(' };
     }
 }
@@ -78,7 +82,7 @@ async function getFormattedDeals(deals) {
             const from = has.call(deals[i].content[j], 'from') ? deals[i].content[j].from.id : 'market';
             const to = has.call(deals[i].content[j], 'to') ? deals[i].content[j].to.id : 'market';
             formattedDeals.push({
-                type: mapTransactionsName[deals[i].type],
+                type: mapTransactionsName[deals[i].type] || deals[i].type,
                 player: deals[i].content[j].player,
                 moveFrom: from,
                 moveTo: to,

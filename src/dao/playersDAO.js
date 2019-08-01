@@ -102,14 +102,12 @@ export default class PlayersDAO {
             for (let i = 0; i < deals.length; i++) {
                 const deal = deals[i];
                 const [player] = await this.getPlayer({ id_bwngr: deal.player }, { projection: { _id: 0, own_since: 1 } });
-                if (deal.time > player.own_since) {
-                    updateOperations.push({
-                        updateOne: {
-                            filter: { id_bwngr: deal.player },
-                            update: { $set: { owner: deal.new_owner, own_since: deal.time } }
-                        }
-                    });
-                }
+                updateOperations.push({
+                    updateOne: {
+                        filter: { id_bwngr: deal.player },
+                        update: { $set: { owner: deal.new_owner, own_since: deal.time } }
+                    }
+                });
             }
             let result = { ok: -1 };
             if (updateOperations.length) {

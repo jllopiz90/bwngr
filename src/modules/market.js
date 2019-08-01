@@ -40,7 +40,9 @@ export async function getMarket(league = 'liga') {
                 const result = await PlayersDAO.getPlayer({id_bwngr: sale.player}, {projection: {_id: 0, name: 1, team_id: 1}});
                 if(result) {
                     const [{name, team_id}] = result;
-                    const teamName = teams.filter( team => team.id_bwngr === team_id)[0]['name'];
+                    const teamName = team_id 
+                            ? teams.filter( team => team.id_bwngr === team_id)[0]['name']
+                            : 'abandon the league';
                     console.log(`${colors.yellow} player: ${name} ${colors.black} ---- ${colors.green} price: ${formatToCurrency(sale.price)} ${colors.reset} --- team: ${teamName}`);
                     await getPlayerPrevBids(sale.player,db);
                 } else {

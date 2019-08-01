@@ -19,6 +19,7 @@ export default class GetLeageData {
         const leagueHeader = leagues[league];
         const userHeader = users[league];
         this.league = league;
+        this.leagueHeader = leagueHeader;
         this.client = axios.create({
             baseURL: 'https://biwenger.as.com/api/v2',
             timeout: 10000,
@@ -26,7 +27,7 @@ export default class GetLeageData {
                 authorization: process.env.BWNGR_BEARER,
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
-                'X-Version': '574',
+                'X-Version': '577',
                 'X-League': leagueHeader,
                 'X-User': userHeader,
                 'X-Lang': 'en'
@@ -64,10 +65,10 @@ export default class GetLeageData {
     }
 
     async getTransactions(offSet, limit) {
-        const uri = 'league/board';
+        const uri = `/league/${this.leagueHeader}/board?`;
         return this.client.get(uri, {
             params: {
-                type: 'transfer,market,exchange,loan,loanReturn,clauseIncrement,auctions',
+                type: 'transfer,market,exchange,loan,loanReturn,clauseIncrement,auctions,adminTransfer',
                 offset: offSet,
                 limit: limit
             }

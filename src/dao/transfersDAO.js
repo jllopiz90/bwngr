@@ -18,7 +18,7 @@ export default class TransfersDAO {
         }
     };
 
-    static async getTransaction(filter, projection) {
+    static async getTransaction(filter = {}, projection = {}) {
         try {
             const cursor = await transfers.find(filter, projection);
             return await cursor.toArray();
@@ -38,9 +38,9 @@ export default class TransfersDAO {
         return false;
     }
 
-    static async insertTransfersByDate(transfersInfo, date) {
+    static async insertTransfersByDate(transfersInfo) {
         try {
-            await transfers.removeMany({ date });
+            // await transfers.removeMany({ date });
             const insertOperations = transfersInfo.map(elem => {
                 return { insertOne: { 'document': elem } };
             });
