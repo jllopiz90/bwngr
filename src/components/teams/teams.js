@@ -1,9 +1,9 @@
 require("dotenv").config();
 import 'core-js/stable';
-import GetLeagueData from '../requests/getLeagueData';
-import TeamsDAO from '../dao/teamsDAO';
 import { MongoClient } from "mongodb";
-import { dbs, handleError } from '../utils/common';
+import TeamsDAO from './teamsDAO';
+import GetLeagueData from '../../requests/getLeagueData';
+import { dbs, handleError } from '../../utils/common';
 
 export async function insertTeams(league = 'liga') {
     let promiseClient;

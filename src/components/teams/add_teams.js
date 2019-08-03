@@ -1,4 +1,4 @@
-import { insertTeams } from '../modules/teams';
+import { insertTeams } from './teams';
 
 const [league] = process.argv.slice(2);
 

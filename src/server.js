@@ -1,71 +1,30 @@
-import http from 'http';
-import parser from 'querystring';
+/* eslint-disable promise/always-return */
+/* eslint-disable promise/catch-or-return */
+import app from "./app";
 import { MongoClient } from "mongodb";
-import UsersDAO from "./dao/usersDAO";
-import ManagersDAO from "./dao/managersDAO";
-import PlayersDAO from "./dao/playersDAO";
-import TransfersDAO from "./dao/transfersDAO";
-import TeamsDAO from "./dao/teamsDAO";
-import router from './routing/routeManager';
+import UsersDAO from "./components/users/usersDAO";
+import ManagersDAO from "./components/managers/managersDAO";
+import PlayersDAO from "./components/players/playersDAO";
+import TransfersDAO from "./components/market/transfersDAO";
+import TeamsDAO from "./components/teams/teamsDAO";
+const port = process.env.PORT || 8000;
 
-const FORM_URLENCODED = 'application/x-www-form-urlencoded';
-const has = Object.prototype.hasOwnProperty;
-console.log('running ...');
 
-export default http.createServer((req, res) => {
-    const { method, url } = req;
-    console.log(`${method} ${url.split('?')[0]}`);
-    collectRequestData(req, async (err, params) => {
-        if (err) {
-            return res.end(JSON.stringify({ status: false, message: err }));
-        }
-        if (!has.call(params, 'action')) {
-            res.end(JSON.stringify({ status: true, message: 'Action missing!' }))
-        }
-        if (!has.call(params, 'league')) {
-            res.end(JSON.stringify({ status: true, message: 'League missing!Spanish La Liga will be used by default' }))
-        }
-        try {
-            MongoClient.connect(
-                process.env.BWNGR_DB_URI,
-                { useNewUrlParser: true }
-            ).catch(err => {
-                console.error('=====Error:', err.toString());
-                console.error('=====Error stack:', err.stack);
-                process.exit(1)
-            }).then(async client => {
-                const db = has.call(params, 'league') && params['league'] === 'pl'
-                            ? client.db(process.env.BWNGR_DB_PL) 
-                            : client.db(process.env.BWNGR_DB);
-                 
-                await UsersDAO.injectDB(db);
-                await PlayersDAO.injectDB(db);
-                await ManagersDAO.injectDB(db);
-                await TransfersDAO.injectDB(db);
-                await TeamsDAO.injectDB(db);
-                const result = await router.handleRoute(url, params);
-                res.end(JSON.stringify(result));
-            });
-        } catch (error) {
-            console.log('Error stack:', error.stack)
-            console.log('\n===============================================\n')
-            return res.end(JSON.stringify({ success: false, message: error.toString() }));
-        }
+MongoClient.connect(
+    process.env.BWNGR_DB_URI,
+    { poolSize: 50, wtimeout: 2500, useNewUrlParser: true },
+).catch(err => {
+    console.error(err.stack)
+    process.exit(1)
+}).then(async client => {
+    const db = client.db(process.env.BWNGR_DB_PL);
+    await UsersDAO.injectDB(db);
+    await PlayersDAO.injectDB(db);
+    await ManagersDAO.injectDB(db);
+    await TransfersDAO.injectDB(db);
+    await TeamsDAO.injectDB(db);
+    res.end(JSON.stringify(result));
+    app.listen(port, () => {
+        console.log(`listening on port ${port}`);
     });
 })
-
-const collectRequestData = (request, callback) => {
-    if (request.headers['content-type'] === FORM_URLENCODED) {
-        let body = '';
-        request.on('error', (err) => {
-            console.error('Error inside collectRequestData: ', err.stack);
-            callback(err);
-        }).on('data', chunk => {
-            body += chunk.toString();
-        }).on('end', () => {
-            callback(null, parser.parse(body));
-        });
-    } else {
-        callback(null, 'wrong content-type');
-    }
-}

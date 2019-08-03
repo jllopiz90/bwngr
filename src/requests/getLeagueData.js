@@ -1,7 +1,6 @@
 'use strict';
 require("dotenv").config();
 import axios from 'axios';
-import { colors } from '../utils/utils';
 
 const leagues = {
     'test': process.env.BWNGR_TEST_LEAGUE,

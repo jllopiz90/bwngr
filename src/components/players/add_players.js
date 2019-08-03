@@ -1,4 +1,4 @@
-import initPlayers  from '../modules/players';
+import initPlayers  from './players';
 
 const [league] = process.argv.slice(2);
 

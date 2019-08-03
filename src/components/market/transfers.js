@@ -3,13 +3,13 @@ require("dotenv").config();
 import 'core-js/stable';
 import moment from 'moment';
 import { MongoClient } from "mongodb";
-import GetLeagueData from '../requests/getLeagueData';
-import PlayersDAO from '../dao/playersDAO';
-import TransfersDAO from '../dao/transfersDAO';
-import ManagersDAO from '../dao/managersDAO';
-import { groupingBy } from '../utils/utils';
-import { has } from '../utils/objectCallers';
-import { dbs, handleError } from '../utils/common';
+import GetLeagueData from '../../requests/getLeagueData';
+import TransfersDAO from './transfersDAO';
+import PlayersDAO from '../players/playersDAO';
+import ManagersDAO from '../managers/managersDAO';
+import { groupingBy } from '../../utils/utils';
+import { has } from '../../utils/objectCallers';
+import { dbs, handleError } from '../../utils/common';
 
 const mapTransactionsName = {
     'transfer': 'sale',

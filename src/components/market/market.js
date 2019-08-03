@@ -1,14 +1,13 @@
 'use strict';
 import 'core-js/stable';
-import GetLeagueData from '../requests/getLeagueData';
-import PlayersDAO from '../dao/playersDAO';
-import ManagersDAO from '../dao/managersDAO';
-import TransfersDAO from '../dao/transfersDAO';
-import TeamsDAO from '../dao/teamsDAO';
 import { MongoClient } from 'mongodb';
-import { formatToCurrency } from '../utils/utils';
-import { dbs, handleError } from '../utils/common';
-import { colors, groupingByWithCount } from '../utils/utils';
+import GetLeagueData from '../../requests/getLeagueData';
+import TransfersDAO from './transfersDAO';
+import PlayersDAO from '../players/playersDAO';
+import ManagersDAO from '../managers/managersDAO';
+import TeamsDAO from '../teams/teamsDAO';
+import { dbs, handleError } from '../../utils/common';
+import { colors, groupingByWithCount, formatToCurrency } from '../../utils/utils';
 require("dotenv").config();
 
 const maxBid = (balance, teamValue) => balance + teamValue / 4;

@@ -1,5 +1,4 @@
-import { colors } from '../utils/utils';
-import { handleError } from '../utils/common';
+import { handleError } from '../../utils/common';
 let managers;
 
 export default class ManagersDAO {

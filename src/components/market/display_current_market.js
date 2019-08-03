@@ -1,5 +1,5 @@
 'use strict';
-import { getMarket } from '../modules/market';
+import { getMarket } from './market';
 
 const [league] = process.argv.slice(2);
 

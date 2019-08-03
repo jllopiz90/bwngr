@@ -1,7 +1,7 @@
 "use strict";
 import argon2 from 'argon2';
 import Token from './token';
-import UsersDAO from '../dao/usersDAO';
+import UsersDAO from '../components/users/usersDAO';
 
 export default class User {
     static async registerUser(userName, password, isAdmin = false) {

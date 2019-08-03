@@ -1,7 +1,7 @@
 'use strict';
 require("dotenv").config();
 import 'core-js/stable';
-import { adjustPrice } from '../modules/players';
+import { adjustPrice } from './players';
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 
 const [league] = process.argv.slice(2);

@@ -1,9 +1,6 @@
-'use strict';
-
-import { handleError } from "../utils/common";
+import { handleError } from "../../utils/common";
 
 let teams;
-
 export default class TeamsDAO{
     static async injectDB(db){
         if(teams){

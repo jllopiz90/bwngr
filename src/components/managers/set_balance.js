@@ -1,6 +1,6 @@
 'use strict';
-import { setBalance } from '../modules/managers';
-import { isInt } from '../utils/utils';
+import { setBalance } from './managers';
+import { isInt } from '../../utils/utils';
 
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
 

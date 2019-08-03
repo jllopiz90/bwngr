@@ -1,4 +1,4 @@
-import initManagers from '../modules/managers';
+import initManagers from './managers';
 
 const [league] = process.argv.slice(2);
 

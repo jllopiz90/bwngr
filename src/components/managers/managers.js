@@ -1,11 +1,11 @@
 'use strict';
 require("dotenv").config();
 import 'core-js/stable';
-import GetLeagueData from '../requests/getLeagueData';
-import ManagersDAO from '../dao/managersDAO';
 import { MongoClient } from "mongodb";
-import { colors } from '../utils/utils';
-import { handleError } from '../utils/common';
+import GetLeagueData from '../../requests/getLeagueData';
+import ManagersDAO from './managersDAO';
+import { colors } from '../../utils/utils';
+import { handleError } from '../../utils/common';
 
 const dbs = {
     'test': process.env.BWNGR_DB_TEST,

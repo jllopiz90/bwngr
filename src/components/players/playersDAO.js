@@ -1,4 +1,4 @@
-import { handleError } from '../utils/common';
+import { handleError } from '../../utils/common';
 let players;
 
 export default class PlayersDAO {

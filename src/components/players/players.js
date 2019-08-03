@@ -2,10 +2,10 @@
 require("dotenv").config();
 import 'core-js/stable';
 import moment from 'moment';
-import GetLeagueData from '../requests/getLeagueData';
-import PlayersDAO from '../dao/playersDAO';
 import { MongoClient } from "mongodb";
-import { dbs, handleError } from '../utils/common';
+import PlayersDAO from './playersDAO';
+import GetLeagueData from '../../requests/getLeagueData';
+import { dbs, handleError } from '../../utils/common';
 
 const playerPositions = ['gk','df','mf','st']; 
 
