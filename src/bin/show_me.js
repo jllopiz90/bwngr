@@ -179,7 +179,7 @@ async function testPlayersDAO() {
             console.log('league missing, using test liga by default');
         }
         await PlayersDAO.injectDB(db);
-        const player = await PlayersDAO.getPlayer(140);
+        const player = await PlayersDAO.getPlayer({id_bwngr:140});
         console.log(player);
         client.close();
     } catch (err) {

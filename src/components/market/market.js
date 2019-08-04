@@ -10,12 +10,8 @@ import { dbs, handleError } from '../../utils/common';
 import { colors, groupingByWithCount, formatToCurrency, getDataSorted } from '../../utils/utils';
 require("dotenv").config();
 
-//**
-//To do: make team value  and max bid reducer functions to use with array.reduce 
-//and added to the managers array, then sort maangers by max bid
-// *//
-
 const maxBid = (balance, teamValue) => balance + teamValue / 4;
+const teamValue = (acumulator, currentRow) => acumulator + currentRow['price'];
 const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
 
 export async function getMarket(league = 'liga') {
@@ -67,14 +63,22 @@ export async function getMarket(league = 'liga') {
 async function getManagersState(db) {
     await ManagersDAO.injectDB(db);
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
-    const managerSorted = getDataSorted(managers,'balance');
+    const teamPromises = managers.map( async manager => ({team: await PlayersDAO.getPlayer({ owner: manager.id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1 } }), id_bwngr: manager.id_bwngr}));
+    const teams = await Promise.all(teamPromises);
+    const managersWithTeamValue = managers.map( manager => {
+        const { id_bwngr, balance } = manager;
+        const { team } = teams.find( manager => manager.id_bwngr === id_bwngr);
+        const team_value = team.reduce(teamValue,0);
+        const max_bid = maxBid(balance, team_value);
+        return {...manager, max_bid, team_value, team};
+    });
+    const managerSorted = getDataSorted(managersWithTeamValue,'max_bid');
     console.log(`  ${colors.black} =======================================================`);
     console.log(`${colors.reset}MANAGERS STATE: `);
     for (let i = 0; i < managerSorted.length; i++) {
-        const { name, id_bwngr, balance } = managerSorted[i];
+        const { name, balance, team, max_bid, team_value } = managerSorted[i];
         console.log(`Manager # ${i+1} - ${name} State:`);
         let gksValue = 0, dfsValue = 0, mfsValue = 0, stsValue = 0;
-        const team = await PlayersDAO.getPlayer({ owner: id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1 } });
         if (team) {
             const gks = team.filter(player => player.position === 'gk');
             const dfs = team.filter(player => player.position === 'df');
@@ -104,11 +108,10 @@ async function getManagersState(db) {
                 console.log(`${colors.reset} ${name} ---- ${colors.green} price: ${formatToCurrency(price)}`);
             });
             console.log(`${colors.reset}Strikers total value: ${colors.green} ${formatToCurrency(stsValue)}`);
-            const teamValue = gksValue + dfsValue + mfsValue + stsValue;
-            console.log(`${colors.reset}Total team value: , ${colors.green} ${formatToCurrency(teamValue)}`);
             console.log(`${colors.reset}Total players amount: `, gks.length + dfs.length + mfs.length + sts.length);
+            console.log(`${colors.reset}Total team value: , ${colors.green} ${formatToCurrency(team_value)}`);
             console.log(`${colors.reset}Manager Balance: ${colors.green} ${formatToCurrency(balance)}`);
-            console.log(`${colors.reset}Manager Max Bid: ${colors.green} ${formatToCurrency(maxBid(balance, teamValue))}`);
+            console.log(`${colors.reset}Manager Max Bid: ${colors.green} ${formatToCurrency(max_bid)}`);
             console.log(`${colors.black} =======================================================  ${colors.reset}`);
         } else {
             console.log('Unable to get team.')

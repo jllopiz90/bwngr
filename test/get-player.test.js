@@ -1,7 +1,7 @@
 'use strict'
 require("dotenv").config();
 import { MongoClient } from "mongodb";
-import PlayersDAO from '../src/dao/playersDAO';
+import PlayersDAO from '../src/components/players/playersDAO';
 
 let client;
 const id_bwngr = 140;

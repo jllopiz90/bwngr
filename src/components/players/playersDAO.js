@@ -15,7 +15,7 @@ export default class PlayersDAO {
     static async getPlayer(filter = {}, projection = {}) {
         try {
             const cursor = players.find(filter, projection);
-            return cursor && cursor.toArray();
+            return cursor.toArray();
         } catch (e) {
             handleError(e, 'Unable to get player');
         }
