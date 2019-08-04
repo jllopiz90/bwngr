@@ -22,3 +22,7 @@ const schema = buildSchema(`
         players: [Player!]!
     }
 `);
+
+const resolvers = {
+    
+}
