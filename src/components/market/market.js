@@ -7,8 +7,13 @@ import PlayersDAO from '../players/playersDAO';
 import ManagersDAO from '../managers/managersDAO';
 import TeamsDAO from '../teams/teamsDAO';
 import { dbs, handleError } from '../../utils/common';
-import { colors, groupingByWithCount, formatToCurrency } from '../../utils/utils';
+import { colors, groupingByWithCount, formatToCurrency, getDataSorted } from '../../utils/utils';
 require("dotenv").config();
+
+//**
+//To do: make team value  and max bid reducer functions to use with array.reduce 
+//and added to the managers array, then sort maangers by max bid
+// *//
 
 const maxBid = (balance, teamValue) => balance + teamValue / 4;
 const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
@@ -62,10 +67,11 @@ export async function getMarket(league = 'liga') {
 async function getManagersState(db) {
     await ManagersDAO.injectDB(db);
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
+    const managerSorted = getDataSorted(managers,'balance');
     console.log(`  ${colors.black} =======================================================`);
     console.log(`${colors.reset}MANAGERS STATE: `);
-    for (let i = 0; i < managers.length; i++) {
-        const { name, id_bwngr, balance } = managers[i];
+    for (let i = 0; i < managerSorted.length; i++) {
+        const { name, id_bwngr, balance } = managerSorted[i];
         console.log(`Manager # ${i+1} - ${name} State:`);
         let gksValue = 0, dfsValue = 0, mfsValue = 0, stsValue = 0;
         const team = await PlayersDAO.getPlayer({ owner: id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1 } });

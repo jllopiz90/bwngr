@@ -12,19 +12,31 @@ export const groupingBy = (field, value, groupKeys, currentRow) => {
 }
 
 export const groupingByWithCount = (field, value, groupKeys, currentRow) => {
-    groupKeys[currentRow[field]] = groupKeys.hasOwnProperty(currentRow[field]) ? 
-     {totalCash: groupKeys[currentRow[field]]['totalCash'] + parseInt(currentRow[value]), bidsAmount: groupKeys[currentRow[field]]['bidsAmount']  + 1}
-    : {totalCash: parseInt(currentRow[value]), bidsAmount: 1}
+    groupKeys[currentRow[field]] = groupKeys.hasOwnProperty(currentRow[field]) ?
+        { totalCash: groupKeys[currentRow[field]]['totalCash'] + parseInt(currentRow[value]), bidsAmount: groupKeys[currentRow[field]]['bidsAmount'] + 1 }
+        : { totalCash: parseInt(currentRow[value]), bidsAmount: 1 }
     return groupKeys;
 }
 
-export  function formatToCurrency(number) {
+export function formatToCurrency(number) {
     return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number);
 }
 
 export function isInt(value) {
     return Number.isInteger(parseInt(value));
 }
+
+export const getDataSorted = (data, key, order = 1) => data.sort(
+    (object1, object2) => order === 1 ? parseInt(object2[key]) - parseInt(object1[key]) : parseInt(object1[key]) - parseInt(object2[key])
+);
+
+export const getNanDataSorted = (data, key) => data.sort(
+    (object1, object2) => {
+        if (object1[key] > object2[key]) return 1;
+        if (object1[key] < object2[key]) return -1;
+        return 0;
+    }
+);
 
 export const colors = {
     reset: '\x1b[0m',
