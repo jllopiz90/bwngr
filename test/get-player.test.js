@@ -15,7 +15,7 @@ describe("Get player from DB", () => {
     });
 
     afterAll(async () => {
-       client && client.close();
+       client && await client.close();
     });
 
     test("Should return Pique", async () => {
