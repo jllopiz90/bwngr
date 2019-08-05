@@ -33,8 +33,6 @@ export async function getMarket(league = 'liga') {
             }));
             client = await promiseClient;
             const db =  client.db(dbs[league]);
-            await PlayersDAO.injectDB(db);
-            await TeamsDAO.injectDB(db);
             const teams = await TeamsDAO.getTeam({}, {projection: {_id:0, name: 1, id_bwngr: 1}});
             const playersInMarket = [];
             for (let i = 0; i < salesFormatted.length; i++) {
@@ -60,8 +58,7 @@ export async function getMarket(league = 'liga') {
 
 
 // get balance, all players group by position value for each, total value and player amount for position, total total value and players amount, max bid
-export async function getManagersState(db) {
-    await ManagersDAO.injectDB(db);
+export async function getManagersState() {
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
     const teamPromises = managers.map( async manager => ({team: await PlayersDAO.getPlayer({ owner: manager.id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1 } }), id_bwngr: manager.id_bwngr}));
     const teams = await Promise.all(teamPromises);
@@ -76,8 +73,6 @@ export async function getManagersState(db) {
 }
 
 async function getPlayerPrevBids(id_bwngr, db) {
-    await TransfersDAO.injectDB(db);
-    await ManagersDAO.injectDB(db);
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
     const bids = await TransfersDAO.getBid({player: id_bwngr}, {projection: {_id:0, manager:1 , overprice: 1}});
     const groupedByManager = bids.reduce(groupByManager,{});
