@@ -1,6 +1,6 @@
 'use strict';
 import moment from 'moment';
-import updateTransfers from './transfers';
+import updateTransfers from './transfersConsoleOps';
 import { has } from '../../utils/objectCallers';
 import { dbs } from '../../utils/common';
 

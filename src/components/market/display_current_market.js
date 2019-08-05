@@ -1,5 +1,5 @@
 'use strict';
-import { getMarket } from './market';
+import { getMarket } from './marketConsoleOps';
 
 const [league] = process.argv.slice(2);
 

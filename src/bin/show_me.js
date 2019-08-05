@@ -3,14 +3,12 @@ require("dotenv").config();
 import 'core-js/stable';
 import moment from 'moment';
 import { MongoClient } from 'mongodb';
-import PlayersDAO from '../dao/playersDAO';
+import PlayersDAO from '../components/players/playersDAO';
 import GetLeagueData from '../requests/getLeagueData';
 import { getUniqueValues, groupingBy, isInt, colors } from '../utils/utils';
 import { has } from '../utils/objectCallers';
-import ManagersDAO from '../dao/managersDAO';
+import ManagersDAO from '../components/managers/managersDAO';
 import { dbs } from '../utils/common';
-import {getPlayerPrevBids} from '../components/market/market';
-import TransfersDAO from '../dao/transfersDAO';
 
 let [league] = process.argv.slice(2);
 
@@ -213,26 +211,18 @@ const groupByPlayer = (groupKeys, currentRow) => {
 };
 
 const testGrouping = async () => {
-    // const sample = [
-    //     { player: 1, value: 20 },
-    //     { player: 3, value: 25 },
-    //     { player: 2, value: 15 },
-    //     { player: 2, value: 10 },
-    //     { player: 3, value: 5 },
-    //     { player: 1, value: 50 }
-    // ];
-    // const keys = getUniqueValues(sample.map(player => player.player));
-    // console.log('unique players values: ', keys);
-    // const groupResult = sample.reduce(groupByPlayer, {})
-    // console.log('groupResult: ', groupResult);
-    if(!client){
-        client = await MongoClient.connect(process.env.BWNGR_DB_URI, {useNewUrlParser: true})
-    }
-    console.log(dbs[league])
-    const db =  client.db(dbs[league]);
-    await TransfersDAO.injectDB(db);
-    await getPlayerPrevBids(2334,db)
-    client.close();
+    const sample = [
+        { player: 1, value: 20 },
+        { player: 3, value: 25 },
+        { player: 2, value: 15 },
+        { player: 2, value: 10 },
+        { player: 3, value: 5 },
+        { player: 1, value: 50 }
+    ];
+    const keys = getUniqueValues(sample.map(player => player.player));
+    console.log('unique players values: ', keys);
+    const groupResult = sample.reduce(groupByPlayer, {})
+    console.log('groupResult: ', groupResult);
 }
 
 const auxFunc = () => {
