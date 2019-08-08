@@ -14,7 +14,8 @@ import { dbs, handleError } from '../../utils/common';
 const mapTransactionsName = {
     'transfer': 'sale',
     'market': 'purchase',
-    'loan': 'loan'
+    'loan': 'loan',
+    'adminTransfer': 'sale'
 };
 const groupByManager = (groupKeys, currentRow) => groupingBy('manager', 'amount', groupKeys, currentRow);
 const compareObj = (obj1, obj2) => Object.keys(obj1).length === Object.keys(obj2).length && Object.keys(obj1).every(key => has.call(obj2, key) && obj1[key] === obj2[key])
