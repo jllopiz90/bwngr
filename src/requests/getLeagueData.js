@@ -26,7 +26,7 @@ export default class GetLeageData {
                 authorization: process.env.BWNGR_BEARER,
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
-                'X-Version': '577',
+                'X-Version': '580',
                 'X-League': leagueHeader,
                 'X-User': userHeader,
                 'X-Lang': 'en'

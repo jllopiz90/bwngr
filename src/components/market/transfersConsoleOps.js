@@ -26,7 +26,7 @@ export default async function updateTransfers(date_moment, league = 'liga') {
         const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
         const handleLeage = new GetLeagueData(league);
         const { data: { data } } = await handleLeage.getTransactions(0, 20);
-        console.log('players fetched form bwngr');
+        console.log('players fetched from bwngr');
         client = await clientPromise;
         const db = client.db(dbs[league]);
         await PlayersDAO.injectDB(db);
