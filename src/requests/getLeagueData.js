@@ -95,10 +95,21 @@ export default class GetLeageData {
     }
 
     async getRecentRounds(offSet = 0, limit = 1) {
-        const uri = 'league/board';
+        const uri = `league/${this.leagueHeader}/board`;
         return this.client.get(uri, {
             params: {
                 type: 'roundFinished',
+                offset: offSet,
+                limit: limit
+            }
+        });
+    }
+
+    async getBonus(offSet = 0, limit = 11) {
+        const uri = `league/${this.leagueHeader}/board`;
+        return this.client.get(uri, {
+            params: {
+                type: 'bonus',
                 offset: offSet,
                 limit: limit
             }

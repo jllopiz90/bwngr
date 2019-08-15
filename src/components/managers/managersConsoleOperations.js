@@ -56,3 +56,33 @@ export async function setBalance({ amount = '', id_bwngr = '', league = 'liga' }
         handleError(e,'Unable to set manager balance');
     }
 }
+
+export async function adjustByBonus(league = 'pl') {
+    try {
+        const handleLeage = new GetLeagueData(league);
+        const promiseGetBonus = handleLeage.getBonus();
+        const promiseRound = handleLeage.getRecentRounds();
+        if (!client) {
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        }
+        const db = client.db(dbs[league]);
+        await ManagersDAO.injectDB(db);
+        const { data: { data: dataFromBonus } } = await promiseGetBonus;
+        const [{content}] = dataFromBonus;
+        content.forEach( ({user: {id}, amount}) => {
+            ManagersDAO.modifyBalance(amount, id);
+         })
+        const {data: {data: dataFromRound}} = await promiseRound;
+        const [{content: {results}}] = dataFromRound;
+        results.forEach( ({user: {id}, bonus}) => {
+            ManagersDAO.modifyBalance(bonus, id);
+        });
+        client.close()
+        console.log('bonus applied!');
+    } catch (e) {
+        if (client) {
+            client.close();
+        }
+        handleError(e,'Unable to modify managers balance');
+    }
+}

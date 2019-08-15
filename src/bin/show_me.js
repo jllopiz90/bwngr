@@ -188,6 +188,27 @@ async function testPlayersDAO() {
     }
 }
 
+async function showBonus() {
+    try {
+        const handleLeage = new GetLeagueData('pl');
+        let { data: { data } } = await handleLeage.getBonus(0,11);
+        let [{content}] = data;
+        // console.log(content)
+        content.forEach( ({user: {id}, amount}) => {
+            console.log(`${id}: ${amount}`) 
+         })
+        const {data: {data: data2}} = await handleLeage.getRecentRounds();
+        const [{content: {results}}] = data2;
+        // console.log(results);
+        results.forEach( ({user: {id}, bonus}) => {
+           console.log(`${id}: ${bonus}`) 
+        });
+    } catch (e) {
+        console.log(String(e))
+    }
+    
+}
+
 function playWithDates() {
     const currentYear = moment().year();
     const initDate = `07-20-${currentYear}`;
@@ -242,7 +263,8 @@ const show_me_stuff = async () => {
 // show_me_stuff();
 // testGrouping();
 // playWithDates();
-getTransactions();
+// getTransactions();
+showBonus();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
