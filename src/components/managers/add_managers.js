@@ -6,6 +6,6 @@ if(league){
     console.log('league:',league)
     initManagers(league);
 }else{
-    console.log('missing params, using la liga by default');
+    console.log('missing params, using pl by default');
     initManagers()
 }

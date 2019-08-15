@@ -6,15 +6,11 @@ import GetLeagueData from '../../requests/getLeagueData';
 import ManagersDAO from './managersDAO';
 import { colors } from '../../utils/utils';
 import { handleError } from '../../utils/common';
+import { dbs } from '../../utils/common';
 
-const dbs = {
-    'test': process.env.BWNGR_DB_TEST,
-    'liga': process.env.BWNGR_DB,
-    'pl': process.env.BWNGR_DB_PL
-};
 let client;
 
-export default async function initManagers(league = 'liga') {
+export default async function initManagers(league = 'pl') {
     try {
         const handleLeage = new GetLeagueData(league);
         const promiseGetManagers = handleLeage.getManagers();
@@ -34,7 +30,7 @@ export default async function initManagers(league = 'liga') {
     }
 }
 
-export async function setBalance({ amount = '', id_bwngr = '', league = 'liga' }) {
+export async function setBalance({ amount = '', id_bwngr = '', league = 'pl' }) {
     try {
         if (!client) {
             client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });

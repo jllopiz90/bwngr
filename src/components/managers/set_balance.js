@@ -1,5 +1,5 @@
 'use strict';
-import { setBalance } from './managers';
+import { setBalance } from './managersConsoleOperations';
 import { isInt } from '../../utils/utils';
 
 //run this script like this : npm run set_balance -- 25000000 1802949     (after -- the parameters)
@@ -11,7 +11,7 @@ if(args.length > 2) {
     setBalance({amount, id_bwngr, league});
 } else if(args.length > 1){
     if(isInt(args[0]) && isInt(args[1])){
-        console.log('missing params, using la liga by default');
+        console.log('missing params, using pl by default');
         const [amount, id_bwngr] = args;
         setBalance({amount,id_bwngr});
     } else {
@@ -22,7 +22,7 @@ if(args.length > 2) {
     }
 } else if(args.length === 1) {
     const [amount] =args;
-    console.log('missing params, using la liga by default and setting balance for all users');
+    console.log('missing params, using pl by default and setting balance for all users');
     setBalance({amount});
 } else{
     console.log('missing params');
