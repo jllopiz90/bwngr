@@ -14,7 +14,7 @@ const users = {
 };
 
 export default class GetLeageData {
-    constructor(league = 'liga') {
+    constructor(league = 'pl') {
         const leagueHeader = leagues[league];
         const userHeader = users[league];
         this.league = league;

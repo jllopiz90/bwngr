@@ -6,6 +6,6 @@ if(league){
     console.log(`using league ${league}`);
     initPlayers(league);
 }else{
-    console.log('missing params using la liga by default');
+    console.log('missing params using pl by default');
     initPlayers();
 }

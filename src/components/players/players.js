@@ -9,7 +9,7 @@ import { dbs, handleError } from '../../utils/common';
 
 const playerPositions = ['gk','df','mf','st']; 
 
-export default async function initPlayers(league = 'liga'){
+export default async function initPlayers(league = 'pl'){
     let clientResolved;
     try {
         const promiseClient = MongoClient.connect( process.env.BWNGR_DB_URI,{ useNewUrlParser: true });   
@@ -41,7 +41,7 @@ export default async function initPlayers(league = 'liga'){
     }
 }
 
-export async function adjustPrice(league = 'liga'){
+export async function adjustPrice(league = 'pl'){
     let promiseClient;
     try {
         promiseClient = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });    

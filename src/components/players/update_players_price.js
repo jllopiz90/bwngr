@@ -10,7 +10,7 @@ if (league) {
     console.log(`using league ${league}`)
     adjustPrice(league);
 } else {
-    console.log('missing params using la liga by default');
+    console.log('missing params using pl by default');
     adjustPrice();
 }
 

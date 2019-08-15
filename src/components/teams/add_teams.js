@@ -5,6 +5,6 @@ const [league] = process.argv.slice(2);
 if(league){
     insertTeams(league);
 }else{
-    console.log('missing params using la liga by default');
+    console.log('missing params using pl by default');
     insertTeams();
 }
