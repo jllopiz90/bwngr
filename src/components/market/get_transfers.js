@@ -8,7 +8,7 @@ let [arg1, arg2 = false] = process.argv.slice(2);
 let date_moment;
 
 if(arg1 && !has.call(dbs,arg1)){
-    console.log('missing params using la liga by default');
+    console.log('missing params using pl by default');
     date_moment = moment(arg1).format('MM-DD-YYYY'); 
     console.log('date is', date_moment);
     updateTransfers(date_moment);
@@ -23,7 +23,7 @@ if(arg1 && !has.call(dbs,arg1)){
     console.log('date is', date_moment);
     updateTransfers(date_moment, arg1);
 } else {
-    console.log('missing params using la liga and today by default');
+    console.log('missing params using pl and today by default');
     date_moment = moment().format('MM-DD-YYYY'); 
     console.log('date is', date_moment);
     updateTransfers(date_moment);   

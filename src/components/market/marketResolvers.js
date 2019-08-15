@@ -6,7 +6,7 @@ import TransfersDAO from './transfersDAO';
 import PlayersDAO from '../players/playersDAO';
 import ManagersDAO from '../managers/managersDAO';
 import TeamsDAO from '../teams/teamsDAO';
-import { dbs, handleError } from '../../utils/common';
+import { handleError } from '../../utils/common';
 import { groupingByWithCount, getDataSorted } from '../../utils/utils';
 require("dotenv").config();
 
@@ -14,7 +14,7 @@ const maxBid = (balance, teamValue) => balance + teamValue / 4;
 const teamValue = (acumulator, currentRow) => acumulator + currentRow['price'];
 const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
 
-export async function getMarket(league = 'liga') {
+export async function getMarket(league = 'pl') {
     console.log(`resolving market for league ${league} ...`)
     try {
         const leagueHandler = new GetLeagueData(league);

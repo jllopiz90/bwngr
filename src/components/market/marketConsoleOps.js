@@ -14,7 +14,7 @@ const maxBid = (balance, teamValue) => balance + teamValue / 4;
 const teamValue = (acumulator, currentRow) => acumulator + currentRow['price'];
 const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
 
-export async function getMarket(league = 'liga') {
+export async function getMarket(league = 'pl') {
     let client;
     try {
         const leagueHandler = new GetLeagueData(league);

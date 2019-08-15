@@ -20,7 +20,7 @@ const mapTransactionsName = {
 const groupByManager = (groupKeys, currentRow) => groupingBy('manager', 'amount', groupKeys, currentRow);
 const compareObj = (obj1, obj2) => Object.keys(obj1).length === Object.keys(obj2).length && Object.keys(obj1).every(key => has.call(obj2, key) && obj1[key] === obj2[key])
 
-export default async function updateTransfers(date_moment, league = 'liga') {
+export default async function updateTransfers(date_moment, league = 'pl') {
     let client;
     try {
         const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
