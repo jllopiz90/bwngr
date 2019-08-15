@@ -7,7 +7,7 @@ import TransfersDAO from "../components/market/transfersDAO";
 import TeamsDAO from "../components/teams/teamsDAO";
 require("dotenv").config();
 
-export default async function chooseAndInjectDB(req, res, next) {
+export async function chooseAndInjectDB(req, res, next) {
     try {
         const league = req.params.league;
         console.log(`using db for league ${league}`);
@@ -19,8 +19,23 @@ export default async function chooseAndInjectDB(req, res, next) {
         await TransfersDAO.injectDB(db);
         await TeamsDAO.injectDB(db);
         console.log('dbs initialized');
+        req.client = client;
         next();
     } catch (e) {
         console.error(err.stack)
+    }
+}
+
+export async function closeDB(req, res, next) {
+    try {
+        const client = req.client;
+        client.close();
+        ManagersDAO.destroyCollection(); 
+        PlayersDAO.destroyCollection();
+        TransfersDAO.destroyCollection();
+        TeamsDAO.destroyCollection();
+        console.log('dbs closed');
+    } catch (e) {
+        console.error(e.stack)
     }
 }

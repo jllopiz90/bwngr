@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan"; //requests logger middleware
-import chooseAndInjectDB from './utils/dbMiddleware'; //my custom middleware
+import { chooseAndInjectDB, closeDB } from './utils/dbMiddleware'; //my custom middleware
 import managers from './components/managers/managers.route';
 import marketSchema from './components/market/graphqlSchema';
 
@@ -15,6 +15,7 @@ app.use("/api/v1/:league",chooseAndInjectDB);
 
 app.use("/api/v1/:league/managers", managers);
 app.use("/api/v1/:league/marketState", marketSchema);
+app.use("/api/v1/:league",closeDB);
 app.get('/', (req, res) => res.send('Hello cheater, welcome to bwngrTrack!'));
 // app.use("/", express.static("build"))   //  i don't have static resources yet
 app.use("*", (req, res) => res.json({ error: "not found" }));

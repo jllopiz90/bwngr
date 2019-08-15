@@ -16,23 +16,16 @@ const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager',
 
 export async function getMarket(league = 'liga') {
     console.log(`resolving market for league ${league} ...`)
-    let client;
     try {
         const leagueHandler = new GetLeagueData(league);
-        const promiseMarket = leagueHandler.getCurrentMarket();
-        const promiseClient =  MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
-        const { data: { data: { sales } } } = promiseMarket ? await promiseMarket : {data:{data:{sales:[]}}};
+        const { data: { data: { sales } } } = await leagueHandler.getCurrentMarket();
         if(!sales.length){
             console.log('problem getting market from bwngr');
-            client = await promiseClient;
-            client.close();
         } else {
             const salesFormatted = sales.map(sale => ({
                 player: sale.player.id,
                 price: sale.price
             }));
-            client = await promiseClient;
-            const db =  client.db(dbs[league]);
             const teams = await TeamsDAO.getTeam({}, {projection: {_id:0, name: 1, id_bwngr: 1}});
             const playersInMarket = [];
             for (let i = 0; i < salesFormatted.length; i++) {
@@ -43,16 +36,14 @@ export async function getMarket(league = 'liga') {
                     const teamName = team_id 
                             ? teams.filter( team => team.id_bwngr === team_id)[0]['name']
                             : 'abandon the league';
-                    const bids = await getPlayerPrevBids(sale.player,db);
+                    const bids = await getPlayerPrevBids(sale.player);
                     playersInMarket.push({team:teamName, name, price, price_increment, position, bids});
                 }
             }
-            await client.close();
             return playersInMarket;
         }
     } catch (e) {
         handleError(e);
-        client && client.close();
     }
 }
 
@@ -72,7 +63,7 @@ export async function getManagersState() {
     return getDataSorted(managersWithTeamValue,'max_bid');
 }
 
-async function getPlayerPrevBids(id_bwngr, db) {
+async function getPlayerPrevBids(id_bwngr) {
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
     const bids = await TransfersDAO.getBid({player: id_bwngr}, {projection: {_id:0, manager:1 , overprice: 1}});
     const groupedByManager = bids.reduce(groupByManager,{});

@@ -213,7 +213,7 @@ function playWithDates() {
     const currentYear = moment().year();
     const initDate = `07-20-${currentYear}`;
     const date1 = moment('2019-05-18');
-    const date2 = moment(1563858333 * 1000);
+    const date2 = moment(1565133421 * 1000);
     const date3 = moment.unix(1563593436, 'MM-DD-YYYY')
     console.log(`today: ${moment().format("YYYY-MM-DD")}`)
     console.log(`date1 in unixtime: ${date1.unix()}`)
