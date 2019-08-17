@@ -4,7 +4,6 @@ import 'core-js/stable';
 import { MongoClient } from "mongodb";
 import GetLeagueData from '../../requests/getLeagueData';
 import ManagersDAO from './managersDAO';
-import { colors } from '../../utils/utils';
 import { handleError } from '../../utils/common';
 import { dbs } from '../../utils/common';
 
@@ -21,12 +20,12 @@ export default async function initManagers(league = 'pl') {
         await ManagersDAO.injectDB(db);
         const   { data: { data: { standings } } } = await promiseGetManagers;
         const result = await ManagersDAO.insertManagersBulk(standings.map(elem => ({ name: elem.name, id_bwngr: elem.id, balance: 40000000 })));
-        console.log(result);
         client.close();
+        return result;
     } catch (e) {
-        console.log(`${colors.red}Error ocurred while inserting managers.-- ${String(e)}`);
         if (client) client.close();
         handleError(e,'Unable to init managers');
+        return false;
     }
 }
 
@@ -43,13 +42,14 @@ export async function setBalance({ amount = '', id_bwngr = '', league = 'pl' }) 
         } else {
             result = await ManagersDAO.setBalancePlayer({ amount: amount, id_bwngr: id_bwngr })
         }
-        console.log(result);
         client.close()
+        return result;
     } catch (e) {
         if (client) {
             client.close();
         }
         handleError(e,'Unable to set manager balance');
+        return false;
     }
 }
 
@@ -74,11 +74,12 @@ export async function adjustByBonus(league = 'pl') {
             ManagersDAO.modifyBalance(bonus, id);
         });
         client.close()
-        console.log('bonus applied!');
+        return true;
     } catch (e) {
         if (client) {
             client.close();
         }
         handleError(e,'Unable to modify managers balance');
+        return false;
     }
 }

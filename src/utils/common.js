@@ -11,3 +11,8 @@ export function handleError(e, action) {
     console.error(`${colors.reset} ${colors.red} ${action} =====Error: ${String(e)}`);
     console.error(`=====Error stack: ${e.stack} ${colors.reset}`);
 }
+
+export async function executeAsyncFunc(func, ...params) {
+    const result = await func(...params);
+    console.log(result);
+}
