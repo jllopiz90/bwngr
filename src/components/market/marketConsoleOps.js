@@ -130,7 +130,8 @@ export async function getPlayerPrevBids(id_bwngr, db) {
     keysArray.length && console.log('Previous bids for this player:');
     keysArray.forEach(key => {
         const managerProjection = groupedByManager[key];
-        const managerName = managers.filter(man => man.id_bwngr === parseInt(key))[0]['name']
+        const manager = managers.filter(man => man.id_bwngr === parseInt(key));
+        const managerName = manager.length ? manager[0]['name'] : 'Manager no longer in competition.';
         console.log(`${colors.reset} manager: ${managerName} ${colors.black} ---- ${colors.green} avg bid overprice: ${formatToCurrency(managerProjection.totalCash/managerProjection.bidsAmount)} ---- total bids: ${managerProjection.bidsAmount} ${colors.reset}`)
     })
 }
