@@ -1,4 +1,4 @@
-import {adjustByBonus} from './managersConsoleOperations';
+import {adjustByBonus} from './managersOperations';
 
 const [league] = process.argv.slice(2);
 
