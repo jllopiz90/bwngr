@@ -14,7 +14,8 @@ const schema = buildSchema(`
         price: Int!,
         price_increment: Int!
         position: String!
-        team: String
+        team_name: String!
+        team_id: Int
         prev_bids: [Bid]
     }
 

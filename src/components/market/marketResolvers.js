@@ -33,11 +33,11 @@ export async function getMarket(league = 'pl') {
                 const result = await PlayersDAO.getPlayer({id_bwngr: sale.player}, {projection: {_id: 0}});
                 if(result.length) {
                     const [{name, team_id, position, price_increment, price}] = result;
-                    const teamName = team_id 
+                    const team_name = team_id 
                             ? teams.filter( team => team.id_bwngr === team_id)[0]['name']
                             : 'abandon the league';
                     const bids = await getPlayerPrevBids(sale.player);
-                    playersInMarket.push({team:teamName, name, price, price_increment, position, bids});
+                    playersInMarket.push({name, price, price_increment, position, bids, team_name, team_id});
                 }
             }
             return playersInMarket;
@@ -50,12 +50,20 @@ export async function getMarket(league = 'pl') {
 
 // get balance, all players group by position value for each, total value and player amount for position, total total value and players amount, max bid
 export async function getManagersState() {
+    const teamsFromLeaguePromise = TeamsDAO.getTeam({}, {projection: {_id:0, name: 1, id_bwngr: 1}});
     const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
-    const teamPromises = managers.map( async manager => ({team: await PlayersDAO.getPlayer({ owner: manager.id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1 } }), id_bwngr: manager.id_bwngr}));
+    const teamPromises = managers.map( async manager => ({raw_team: await PlayersDAO.getPlayer({ owner: manager.id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1, team_id: 1} }), id_bwngr: manager.id_bwngr}));
     const teams = await Promise.all(teamPromises);
+    const teamsFromLeague = await teamsFromLeaguePromise;
     const managersWithTeamValue = managers.map( manager => {
         const { id_bwngr, balance } = manager;
-        const { team } = teams.find( manager => manager.id_bwngr === id_bwngr);
+        const { raw_team } = teams.find( manager => manager.id_bwngr === id_bwngr);
+        const team = raw_team.map( player => {
+            const team_name = player.team_id 
+                            ? teamsFromLeague.filter( elem => elem.id_bwngr === player.team_id )[0]['name']
+                            : 'abandon the league';
+            return {...player, team_name}
+        })
         const team_value = team.reduce(teamValue,0);
         const max_bid = maxBid(balance, team_value);
         return {...manager, max_bid, team_value, team};
@@ -71,7 +79,8 @@ async function getPlayerPrevBids(id_bwngr) {
     const bidsToReturn = [];
     keysArray.forEach(key => {
         const managerProjection = groupedByManager[key];
-        const managerName = managers.filter(man => man.id_bwngr === parseInt(key))[0]['name'];
+        const manager = managers.filter(man => man.id_bwngr === parseInt(key));
+        const managerName = manager.length ? manager[0]['name'] : 'Manager no longer in competition.';
         bidsToReturn.push({manager: managerName, avg_bid_overprice: managerProjection.totalCash/managerProjection.bidsAmount, total_bids: managerProjection.bidsAmount});
     })
     return bidsToReturn;
