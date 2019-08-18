@@ -6,8 +6,7 @@ const [league] = process.argv.slice(2);
 if(league){
     console.log('league:',league)
     executeAsyncFunc(initManagers, league);
-    
-}else{
+} else{
     console.log('missing params, using pl by default');
     executeAsyncFunc(initManagers);
 }

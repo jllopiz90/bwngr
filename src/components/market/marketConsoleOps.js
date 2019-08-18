@@ -76,8 +76,8 @@ async function getManagersState(db) {
     console.log(`  ${colors.black} =======================================================`);
     console.log(`${colors.reset}MANAGERS STATE: `);
     for (let i = 0; i < managerSorted.length; i++) {
-        const { name, balance, team, max_bid, team_value } = managerSorted[i];
-        console.log(`Manager # ${i+1} - ${name} State:`);
+        const { name, balance, team, max_bid, team_value, id_bwngr } = managerSorted[i];
+        console.log(`Manager # ${i+1} ( ${id_bwngr} ) - ${name} State:`);
         let gksValue = 0, dfsValue = 0, mfsValue = 0, stsValue = 0;
         if (team) {
             const gks = team.filter(player => player.position === 'gk');

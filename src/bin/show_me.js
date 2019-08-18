@@ -9,6 +9,7 @@ import { getUniqueValues, groupingBy, isInt, colors } from '../utils/utils';
 import { has } from '../utils/objectCallers';
 import ManagersDAO from '../components/managers/managersDAO';
 import { dbs } from '../utils/common';
+import {getManagerCombinations} from '../components/managers/managersOperations';
 
 let [league] = process.argv.slice(2);
 
@@ -231,6 +232,19 @@ const groupByPlayer = (groupKeys, currentRow) => {
     return groupingBy('player', 'value', groupKeys, currentRow)
 };
 
+const getTeam = async () => {
+    const visited = [];
+    const data = await getManagerCombinations(1732228,16960000);
+    data.forEach(({teamVariation, discards}) => {
+        if(visited.some(pair => pair.includes(discards[0]) && pair.includes(discards[1]))) {
+            console.log('discard repeated')
+        }
+        visited.push(discards);
+        console.log('discards:', discards)
+    })
+    console.log(data.length)
+}
+
 const testGrouping = async () => {
     const sample = [
         { player: 1, value: 20 },
@@ -264,7 +278,8 @@ const show_me_stuff = async () => {
 // testGrouping();
 // playWithDates();
 // getTransactions();
-showBonus();
+// showBonus();
+getTeam();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
