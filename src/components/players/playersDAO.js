@@ -12,6 +12,10 @@ export default class PlayersDAO {
         }
     }
 
+    static async destroyCollection(){
+        players = null;
+      }
+
     static async getPlayer(filter = {}, projection = {}) {
         try {
             const cursor = players.find(filter, projection);

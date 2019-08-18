@@ -13,6 +13,10 @@ export default class ManagersDAO {
     }
   }
 
+  static async destroyCollection(){
+    managers = null;
+  }
+
   /**
 * Finds a manager in the `managers` collection (can be used to get multiple managers as well)
 * @param {string} name - The name of the desired manager

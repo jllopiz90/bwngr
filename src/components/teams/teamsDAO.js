@@ -13,6 +13,10 @@ export default class TeamsDAO{
         }
     }
 
+    static async destroyCollection(){
+        teams = null;
+      }
+
     static async getTeam(filter, projection){
         try {
             const cursor = await teams.find(filter, projection);

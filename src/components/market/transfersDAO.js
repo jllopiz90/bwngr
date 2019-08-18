@@ -18,6 +18,11 @@ export default class TransfersDAO {
         }
     };
 
+    static async destroyCollection(){
+        transfers = null;
+        bids = null;
+      }
+
     static async getTransaction(filter = {}, projection = {}) {
         try {
             const cursor = await transfers.find(filter, projection);

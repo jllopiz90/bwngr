@@ -39,8 +39,30 @@ const resolvers = {
     managersState: () => getManagersState()
 }
 
-export default graphqlHTTP({
-    schema: schema,
-    rootValue: resolvers,
-    graphiql: process.env.NODE_ENV === 'dev',
-  })
+
+//////
+//// handler to allow call the next middleware
+/////
+
+export default async function graphqlHandler(req, res, next) {
+    const graphqlHTTPHandler = graphqlHTTP({
+        schema: schema,
+        rootValue: resolvers,
+        graphiql: process.env.NODE_ENV === 'dev',
+    });
+    try {
+        await graphqlHTTPHandler(req, res);    
+        next();
+    } catch (e) {
+        next(e);
+    }
+}
+
+//////
+//// regular way to export the grahpql
+//////
+// export default graphqlHTTP({
+//     schema: schema,
+//     rootValue: resolvers,
+//     graphiql: process.env.NODE_ENV === 'dev',
+//   })
