@@ -1,42 +1,31 @@
 import graphqlHTTP from 'express-graphql';
 import { buildSchema } from 'graphql';
-import { getMarket, getManagersState } from './marketResolvers';
+import { getMarket } from './marketResolvers';
+import { getManagersState } from '../managers/managersResolvers';
+import  {typeSimplePlayer, typeAdvancedPlayer, typeBid} from '../players/schemaTypes';
+import  {typeManager} from '../managers/schemaTypes';
 require("dotenv").config();
 
 const schema = buildSchema(`
     type Query {
-        dailyMarket(league: String): [Player!]!
-        managersState: [Manager!]!
+        dailyMarket(league: String): [AdvancedPlayer!]!
+        allManagersState: [Manager!]!
+        managerState(manager: Int): Manager!
     }
 
-    type Player {
-        name: String!
-        price: Int!,
-        price_increment: Int!
-        position: String!
-        team_name: String!
-        team_id: Int
-        prev_bids: [Bid]
-    }
+    ${typeAdvancedPlayer}
 
-    type Manager {
-        name: String!
-        team_value: Int!
-        balance: Int!
-        max_bid: Int!
-        team: [Player!]!
-    }
+    ${typeSimplePlayer}
 
-    type Bid {
-        manager: String!,
-        avg_bid_overprice: Int!,
-        total_bids: Int!
-    }
+    ${typeBid}
+
+    ${typeManager}
 `);
 
 const resolvers = {
     dailyMarket: (args) => getMarket(args.league),
-    managersState: () => getManagersState()
+    allManagersState: () => getManagersState(),
+    managerState: (args) => getManagersState(args.manager)
 }
 
 

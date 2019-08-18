@@ -1,17 +1,14 @@
 'use strict';
 import 'core-js/stable';
-import { MongoClient } from 'mongodb';
 import GetLeagueData from '../../requests/getLeagueData';
 import TransfersDAO from './transfersDAO';
 import PlayersDAO from '../players/playersDAO';
 import ManagersDAO from '../managers/managersDAO';
 import TeamsDAO from '../teams/teamsDAO';
 import { handleError } from '../../utils/common';
-import { groupingByWithCount, getDataSorted } from '../../utils/utils';
+import { groupingByWithCount } from '../../utils/utils';
 require("dotenv").config();
 
-const maxBid = (balance, teamValue) => balance + teamValue / 4;
-const teamValue = (acumulator, currentRow) => acumulator + currentRow['price'];
 const groupByManager = (groupKeys, currentRow) => groupingByWithCount('manager', 'overprice', groupKeys, currentRow);
 
 export async function getMarket(league = 'pl') {
@@ -45,30 +42,6 @@ export async function getMarket(league = 'pl') {
     } catch (e) {
         handleError(e);
     }
-}
-
-
-// get balance, all players group by position value for each, total value and player amount for position, total total value and players amount, max bid
-export async function getManagersState() {
-    const teamsFromLeaguePromise = TeamsDAO.getTeam({}, {projection: {_id:0, name: 1, id_bwngr: 1}});
-    const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
-    const teamPromises = managers.map( async manager => ({raw_team: await PlayersDAO.getPlayer({ owner: manager.id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1, team_id: 1} }), id_bwngr: manager.id_bwngr}));
-    const teams = await Promise.all(teamPromises);
-    const teamsFromLeague = await teamsFromLeaguePromise;
-    const managersWithTeamValue = managers.map( manager => {
-        const { id_bwngr, balance } = manager;
-        const { raw_team } = teams.find( manager => manager.id_bwngr === id_bwngr);
-        const team = raw_team.map( player => {
-            const team_name = player.team_id 
-                            ? teamsFromLeague.filter( elem => elem.id_bwngr === player.team_id )[0]['name']
-                            : 'abandon the league';
-            return {...player, team_name}
-        })
-        const team_value = team.reduce(teamValue,0);
-        const max_bid = maxBid(balance, team_value);
-        return {...manager, max_bid, team_value, team};
-    });
-    return getDataSorted(managersWithTeamValue,'max_bid');
 }
 
 async function getPlayerPrevBids(id_bwngr) {
