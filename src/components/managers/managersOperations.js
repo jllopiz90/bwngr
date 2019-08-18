@@ -18,11 +18,11 @@ const playersPositionCount = (team, position) => {
     return team.filter(player => player.position === position).length;
 }
 
-const isValidTeam = (team) => {
-    const gksCount = playersPositionCount(team,'gk');
-    const dfsCount = playersPositionCount(team,'df');
-    const mfsCount = playersPositionCount(team,'mf');
-    const stsCount = playersPositionCount(team,'st');
+const isValidTeam = (team, incomingPlayerPosition) => {
+    const gksCount = playersPositionCount(team,'gk') + (incomingPlayerPosition === 'gk' ? 1 : 0);
+    const dfsCount = playersPositionCount(team,'df') + (incomingPlayerPosition === 'df' ? 1 : 0);
+    const mfsCount = playersPositionCount(team,'mf') + (incomingPlayerPosition === 'mf' ? 1 : 0);
+    const stsCount = playersPositionCount(team,'st') + (incomingPlayerPosition === 'st' ? 1 : 0);
     return gksCount === 1 && dfsCount > 2 && dfsCount < 6 && mfsCount > 2 && mfsCount < 6 && stsCount > 0 && stsCount < 4 && (gksCount + dfsCount + mfsCount + stsCount === 11);
 }
 
@@ -121,7 +121,7 @@ export async function getManagerTeam( id_bwngr, league = 'pl') {
     }
 }
 
-export async function getManagerCombinations(id_bwngr, balance_to_reach, league = 'pl') {
+export async function getManagerCombinations(id_bwngr, balance_to_reach, incomingPlayerPosition,league = 'pl') {
     try {
         if (!client) {
             client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
@@ -132,7 +132,7 @@ export async function getManagerCombinations(id_bwngr, balance_to_reach, league 
         const [manager] = await ManagersDAO.getManager({id_bwngr}, { projection: { _id: 0 } });
         const team = await PlayersDAO.getPlayer({ owner: id_bwngr }, { projection: { _id: 0, name: 1, position: 1, price: 1, team_id: 1} })
         const balance = manager.balance;
-        const variations = getCombinations11Players(team);
+        const variations = getCombinations10Players(team, incomingPlayerPosition);
         client.close()
         return variations
                 .filter( ({discards}) => getGroupValue(discards) + balance >= balance_to_reach)
@@ -146,13 +146,13 @@ export async function getManagerCombinations(id_bwngr, balance_to_reach, league 
     }
 }
 
-function getCombinations11Players(team) {
+function getCombinations10Players(team,incomingPlayerPosition) {
     const store = [];
-    variationsNoRepeated([...team], [], 11, store, team);
-    return store.filter( ({teamVariation}) => isValidTeam(teamVariation));
+    combinationsNoRepeated([...team], [], 10, store, team);
+    return store.filter( ({teamVariation}) => isValidTeam(teamVariation,incomingPlayerPosition));
 }
 
-function variationsNoRepeated(population, tempStore, sample_size, store, global_population) {
+function combinationsNoRepeated(population, tempStore, sample_size, store, global_population) {
     if(tempStore.length === sample_size) {
         store.push({teamVariation: [...tempStore], discards: global_population.filter( elem => !tempStore.some( elem1 => elem['name'] === elem1['name']))})
     } else {
@@ -160,7 +160,7 @@ function variationsNoRepeated(population, tempStore, sample_size, store, global_
         for (let i = 0; i < population.length; i++) {
             tempStore.push(population[i]);
             newPopulation.splice(0,1);
-            variationsNoRepeated(newPopulation,tempStore, sample_size, store, global_population);
+            combinationsNoRepeated(newPopulation,tempStore, sample_size, store, global_population);
             tempStore.pop();
         }
     }
