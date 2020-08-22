@@ -8,7 +8,7 @@ import { dbs, handleError } from '../../utils/common';
 export async function insertTeams(league = 'pl') {
     let promiseClient;
     try {
-        promiseClient = MongoClient.connect( process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        promiseClient = MongoClient.connect( process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         const handleLeage = new GetLeagueData(league);
         const { data: {data: {teams}} } = await handleLeage.getTeams();
         const dataArray = Object.values(teams).map( team => ({

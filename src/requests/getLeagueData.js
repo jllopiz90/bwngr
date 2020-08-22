@@ -20,16 +20,16 @@ export default class GetLeageData {
         this.league = league;
         this.leagueHeader = leagueHeader;
         this.client = axios.create({
-            baseURL: 'https://biwenger.as.com/api/v2',
+            baseURL: 'http://biwenger.as.com/api/v2',
             timeout: 10000,
             headers: {
                 authorization: process.env.BWNGR_BEARER,
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
-                'X-Version': '580',
-                'X-League': leagueHeader,
-                'X-User': userHeader,
-                'X-Lang': 'en'
+                'X-version': '611',
+                'X-league': leagueHeader,
+                'X-user': userHeader,
+                'X-lang': 'es'
             }
         });
     }
@@ -46,7 +46,7 @@ export default class GetLeageData {
         const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
         const players = this.client.get(uri, {
             params: {
-                lang: 'en',
+                lang: 'es',
                 score: '1'
             }
         });
@@ -57,7 +57,7 @@ export default class GetLeageData {
         const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
         return this.client.get(uri, {
             params: {
-                lang: 'en',
+                lang: 'es',
                 score: '1'
             }
         });
@@ -88,7 +88,7 @@ export default class GetLeageData {
         const uri = this.league === 'pl' ? '/competitions/premier-league/data' : '/competitions/la-liga/data';
         return this.client.get(uri, {
             params: {
-                lang: 'en',
+                lang: 'es',
                 score: '1'
             }
         });

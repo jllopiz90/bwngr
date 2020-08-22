@@ -31,7 +31,7 @@ export default async function initManagers(league = 'pl') {
         const handleLeage = new GetLeagueData(league);
         const promiseGetManagers = handleLeage.getManagers();
         if (!client) {
-            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         }
         const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);

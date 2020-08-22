@@ -23,7 +23,7 @@ const compareObj = (obj1, obj2) => Object.keys(obj1).length === Object.keys(obj2
 export default async function updateTransfers(date_moment, league = 'pl') {
     let client;
     try {
-        const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        const clientPromise = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         const handleLeage = new GetLeagueData(league);
         const { data: { data } } = await handleLeage.getTransactions(0, 200);
         console.log('players fetched from bwngr');

@@ -12,7 +12,7 @@ const playerPositions = ['gk','df','mf','st'];
 export default async function initPlayers(league = 'pl'){
     let clientResolved;
     try {
-        const promiseClient = MongoClient.connect( process.env.BWNGR_DB_URI,{ useNewUrlParser: true });   
+        const promiseClient = MongoClient.connect( process.env.BWNGR_DB_URI,{ useNewUrlParser: true, useUnifiedTopology: true });
         const handleLeage = new GetLeagueData(league);
         const playersData  = handleLeage.getPlayers();
         const moment_today = moment();
