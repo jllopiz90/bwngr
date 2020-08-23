@@ -44,7 +44,7 @@ export default async function initPlayers(league = 'pl'){
 export async function adjustPrice(league = 'pl'){
     let promiseClient;
     try {
-        promiseClient = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });    
+        promiseClient = MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });    
         const handleLeage = new GetLeagueData(league);
         const promiseGetPlayers = handleLeage.getPlayers();
         const { data: { data: {players} } } = await promiseGetPlayers;
