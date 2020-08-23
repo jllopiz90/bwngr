@@ -19,7 +19,7 @@ export async function getMarket(league = 'pl') {
     try {
         const leagueHandler = new GetLeagueData(league);
         const promiseMarket = leagueHandler.getCurrentMarket();
-        const promiseClient =  MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+        const promiseClient =  MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         const { data: { data: { sales } } } = promiseMarket ? await promiseMarket : {data:{data:{sales:[]}}};
         if(!sales.length){
             console.log('problem getting market from bwngr');
