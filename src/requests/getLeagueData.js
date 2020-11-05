@@ -26,7 +26,7 @@ export default class GetLeageData {
                 authorization: process.env.BWNGR_BEARER,
                 'content-type': 'application/json; charset=utf-8',
                 'accept': 'application/json, text/plain, */*',
-                'X-version': '611',
+                'X-version': '613',
                 'X-league': leagueHeader,
                 'X-user': userHeader,
                 'X-lang': 'es'
@@ -94,7 +94,7 @@ export default class GetLeageData {
         });
     }
 
-    async getRecentRounds(offSet = 0, limit = 1) {
+    async getRecentRounds(offSet = 0, limit = 7) {
         const uri = `league/${this.leagueHeader}/board`;
         return this.client.get(uri, {
             params: {

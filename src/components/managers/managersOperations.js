@@ -76,7 +76,7 @@ export async function adjustByBonus(league = 'pl') {
         const promiseGetBonus = handleLeage.getBonus();
         const promiseRound = handleLeage.getRecentRounds();
         if (!client) {
-            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true });
+          client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         }
         const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);

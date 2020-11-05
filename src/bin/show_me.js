@@ -1,5 +1,6 @@
 'use strict'
 require("dotenv").config();
+import axios from 'axios';
 import 'core-js/stable';
 import moment from 'moment';
 import { MongoClient } from 'mongodb';
@@ -9,7 +10,8 @@ import { getUniqueValues, groupingBy, isInt, colors } from '../utils/utils';
 import { has } from '../utils/objectCallers';
 import ManagersDAO from '../components/managers/managersDAO';
 import { dbs } from '../utils/common';
-import {getManagerCombinations} from '../components/managers/managersOperations';
+import { getManagerCombinations } from '../components/managers/managersOperations';
+import updateTransfers from '../components/market/transfersConsoleOps';
 
 let [league] = process.argv.slice(2);
 
@@ -30,7 +32,7 @@ let client;
 async function getPlayer(id) {
     try {
         if (!client) {
-            client = await MongoClient.connect( process.env.BWNGR_DB_URI, { poolSize: 100, useNewUrlParser: true });
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { poolSize: 100, useNewUrlParser: true });
         }
         const db = league !== 'undefined' && league === 'pl' ? client.db(process.env.BWNGR_DB_PL) : client.db(process.env.BWNGR_DB);
         if (!league) {
@@ -47,11 +49,11 @@ async function getPlayer(id) {
 }
 
 async function getTeams() {
-    try{
+    try {
         const handleLeage = new GetLeagueData(league);
         const { data } = await handleLeage.getTeams();
         console.log(data)
-    }catch{
+    } catch{
         console.error(`Error ocurred while getting teams from bwnger.--${String(e)}`);
     }
     // const dataArray = Object.values(data);
@@ -63,23 +65,23 @@ async function getTeams() {
 async function getManagers() {
     try {
         const handleLeage = new GetLeagueData(league);
-        const   { data: { data: { standings } } } = await handleLeage.getManagers();
-        console.log(standings)   
+        const { data: { data: { standings } } } = await handleLeage.getManagers();
+        console.log(standings)
     } catch (e) {
         console.log(`${colors.red}Error ocurred while getting users from bwnger.-- ${String(e)}`);
     }
 }
 
-async function getManagersFromDB(leagueDefault = 'liga'){
+async function getManagersFromDB(leagueDefault = 'liga') {
     try {
-        if(!client){
-            client = await MongoClient.connect(process.env.BWNGR_DB_URI, {useNewUrlParser: true})
+        if (!client) {
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true })
         }
-        const db =  client.db(dbs[leagueDefault]);
+        const db = client.db(dbs[leagueDefault]);
         await ManagersDAO.injectDB(db);
-        const managers = await ManagersDAO.getManager({}, {projection: {_id: 0}});
+        const managers = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
         managers.forEach(manager => {
-            const {name, id_bwngr, balance} = manager;
+            const { name, id_bwngr, balance } = manager;
             console.log(`${name} ----- ${id_bwngr} ----- ${balance}`)
             // console.log(manager)
         });
@@ -87,7 +89,7 @@ async function getManagersFromDB(leagueDefault = 'liga'){
         console.log(`${colors.red} Error: ${String(e)}`)
         console.log(`Error Stack: ${String(e.stack)} ${colors.reset}`)
     }
-    if(client){
+    if (client) {
         client.close()
     }
 }
@@ -110,18 +112,18 @@ async function getTransactions() {
         let counter = 1;
         let filtered = data;//.filter( x => moment.unix(x.date).format('MM-DD-YYYY') === moment('2019-07-19').format('MM-DD-YYYY'));
         // console.log(filtered)
-        if(!client){
-            client = await MongoClient.connect(process.env.BWNGR_DB_URI, {useNewUrlParser: true})
+        if (!client) {
+            client = await MongoClient.connect(process.env.BWNGR_DB_URI, { useNewUrlParser: true })
         }
-        const db =  client.db(dbs[league]);
+        const db = client.db(dbs[league]);
         await ManagersDAO.injectDB(db);
         const managersArray = await ManagersDAO.getManager({}, { projection: { _id: 0 } });
         const managersGroup = {};
         managersArray.forEach(manager => {
-            const {name, id_bwngr, balance} = manager;
+            const { name, id_bwngr, balance } = manager;
             managersGroup[id_bwngr] = name;
         });
-        console.log('managersArray',managersArray)
+        console.log('managersArray', managersArray)
         for (let i = 0; i < filtered.length; i++) {
             for (let j = 0; j < filtered[i].content.length; j++) {
                 const playerData = await getPlayer(filtered[i].content[j].player);
@@ -178,7 +180,7 @@ async function testPlayersDAO() {
             console.log('league missing, using test liga by default');
         }
         await PlayersDAO.injectDB(db);
-        const player = await PlayersDAO.getPlayer({id_bwngr:140});
+        const player = await PlayersDAO.getPlayer({ id_bwngr: 140 });
         console.log(player);
         client.close();
     } catch (err) {
@@ -192,22 +194,22 @@ async function testPlayersDAO() {
 async function showBonus() {
     try {
         const handleLeage = new GetLeagueData('pl');
-        let { data: { data } } = await handleLeage.getBonus(0,11);
-        let [{content}] = data;
+        let { data: { data } } = await handleLeage.getBonus(0, 11);
+        let [{ content }] = data;
         // console.log(content)
-        content.forEach( ({user: {id}, amount}) => {
-            console.log(`${id}: ${amount}`) 
-         })
-        const {data: {data: data2}} = await handleLeage.getRecentRounds();
-        const [{content: {results}}] = data2;
+        content.forEach(({ user: { id }, amount }) => {
+            console.log(`${id}: ${amount}`)
+        })
+        const { data: { data: data2 } } = await handleLeage.getRecentRounds();
+        const [{ content: { results } }] = data2;
         // console.log(results);
-        results.forEach( ({user: {id}, bonus}) => {
-           console.log(`${id}: ${bonus}`) 
+        results.forEach(({ user: { id }, bonus }) => {
+            console.log(`${id}: ${bonus}`)
         });
     } catch (e) {
         console.log(String(e))
     }
-    
+
 }
 
 function playWithDates() {
@@ -234,9 +236,9 @@ const groupByPlayer = (groupKeys, currentRow) => {
 
 const getTeam = async () => {
     const visited = [];
-    const data = await getManagerCombinations(1732228,16960000);
-    data.forEach(({teamVariation, discards}) => {
-        if(visited.some(pair => pair.includes(discards[0]) && pair.includes(discards[1]))) {
+    const data = await getManagerCombinations(1732228, 16960000);
+    data.forEach(({ teamVariation, discards }) => {
+        if (visited.some(pair => pair.includes(discards[0]) && pair.includes(discards[1]))) {
             console.log('discard repeated')
         }
         visited.push(discards);
@@ -269,17 +271,61 @@ const auxFunc = () => {
 const show_me_stuff = async () => {
     const arrayTest = [];
     console.log('!!arrayTest where arrayTest = [] return: ', !!arrayTest);
-    const arr = Array(100).map((_,i)=>i);
+    const arr = Array(100).map((_, i) => i);
     console.log('Array(100) return: ', arr);
     // console.log('[...Array(100)] return:', [...Array(100)].map((_,i)=>i));
 }
+
+const tryToGetBids = async () => {
+    console.log('\x1b[47m \x1b[34m');
+    console.time("Lets see");
+    console.log('\x1b[0m')
+    try {
+        const leagueHeader = process.env.BWNGR_PL_LEAGUE;
+        const userHeader = process.env.BWNGR_PL_USER;
+        const client = axios.create({
+            baseURL: 'http://biwenger.as.com/api/v2',
+            timeout: 10000,
+            headers: {
+                authorization: process.env.BWNGR_BEARER,
+                'content-type': 'application/json; charset=utf-8',
+                'accept': 'application/json, text/plain, */*',
+                'X-version': '611',
+                'X-league': leagueHeader,
+                'X-user': userHeader,
+                'X-lang': 'es'
+            }
+        });
+        const { data: { data } } = await client.get('/market/bids', {
+            params: {
+                player: 2380
+            }
+        });
+        console.log('data', data);
+    } catch (e) {
+        console.log('something went wrong', e);
+    }
+
+}
+
+async function updateInBulk() {
+    let date;
+    for (let day = 1; day < 6 ; day++) {
+        date = moment(`2020-11-${day < 10 ? '0' : ''}${day}`).format('MM-DD-YYYY'); 
+        console.log('date is', date);
+        await updateTransfers(date); 
+        console.log('done with', date);  
+    }
+}
+
+updateInBulk();
 
 // show_me_stuff();
 // testGrouping();
 // playWithDates();
 // getTransactions();
 // showBonus();
-getTeam();
+// getTeam();
 // auxFunc();
 // testPlayersDAO();
 // getPlayers();
