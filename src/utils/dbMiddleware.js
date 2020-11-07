@@ -11,6 +11,7 @@ export async function chooseAndInjectDB(req, res, next) {
     try {
         const league = req.params.league;
         console.log(`using db for league ${league}`);
+        console.log('process.env.BWNGR_DB_URI', process.env.BWNGR_DB_URI);
         const client = await MongoClient.connect(process.env.BWNGR_DB_URI,{ poolSize: 50, wtimeout: 2500, useNewUrlParser: true });    
         const db_name = dbs[league];
         const db = client.db(db_name);
