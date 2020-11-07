@@ -1,0 +1,13 @@
+{
+    "parser": "babel-eslint",
+    "plugins": ["promise", "jest"],
+    "extends": ["plugin:promise/recommended","plugin:jest/recommended"],
+    "rules": {
+        "jest/expect-expect": [
+            "error",
+            {
+              "assertFunctionNames": ["expect"]
+            }
+          ]
+    }
+}
