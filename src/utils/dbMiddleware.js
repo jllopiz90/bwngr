@@ -12,7 +12,7 @@ export async function chooseAndInjectDB(req, res, next) {
         const league = req.params.league;
         console.log(`using db for league ${league}`);
         console.log('process.env.BWNGR_DB_URI', process.env.BWNGR_DB_URI);
-        const client = await MongoClient.connect(process.env.BWNGR_DB_URI,{ poolSize: 50, wtimeout: 2500, useNewUrlParser: true });    
+        const client = await MongoClient.connect(process.env.BWNGR_DB_URI,{ poolSize: 50, wtimeout: 2500, useNewUrlParser: true, useUnifiedTopology: true });    
         const db_name = dbs[league];
         const db = client.db(db_name);
         await ManagersDAO.injectDB(db); 
@@ -23,6 +23,7 @@ export async function chooseAndInjectDB(req, res, next) {
         req.client = client;
         next();
     } catch (e) {
+        console.log(err.stack)
         console.error(err.stack)
     }
 }
