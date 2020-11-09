@@ -23,8 +23,8 @@ export async function chooseAndInjectDB(req, res, next) {
         req.client = client;
         next();
     } catch (e) {
-        console.log(err.stack)
-        console.error(err.stack)
+        console.log(e.stack)
+        console.error(e.stack)
     }
 }
 
