@@ -318,7 +318,15 @@ async function updateInBulk() {
     }
 }
 
-updateInBulk();
+async function getPlayerDetails() {
+    const handleLeage = new GetLeagueData(league);
+    const { data: { data } } = await handleLeage.getPlayerDetails('son');
+    console.log(data);
+}
+
+getPlayerDetails();
+
+// updateInBulk();
 
 // show_me_stuff();
 // testGrouping();
